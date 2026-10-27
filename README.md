@@ -32,7 +32,7 @@ Todo acesso ao sistema exige login.
 
 Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/downloads/) instalados (versões na seção 4).
 
-1. Baixe o projeto: botão **Code → Download ZIP** no GitHub e extraia, ou `git clone https://github.com/<usuario>/AutoTrack.git`.
+1. Baixe o projeto: botão **Code → Download ZIP** no GitHub e extraia, ou `git clone https://github.com/olima1/AutoTrack.git`.
 2. Crie o banco de dados no MySQL:
    ```sql
    CREATE DATABASE autotrack;
@@ -59,7 +59,7 @@ Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/
 
 1. Clone o projeto:
    ```bash
-   git clone https://github.com/<usuario>/AutoTrack.git
+   git clone https://github.com/olima1/AutoTrack.git
    cd AutoTrack
    ```
    (alternativa: baixar o ZIP pelo GitHub e extrair)
@@ -79,13 +79,13 @@ Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/
 
 - **frontend:** React 19.3.1, React Router DOM 7.18.4, Axios 1.21.0, Vite 8.3.5
 - **backend:** Node.js 24.13.0, Express 5.3.0, mysql2 3.24.6, bcryptjs 3.0.3, jsonwebtoken 9.0.3, cors 2.8.6, dotenv 18.0.9
-- **banco de dados:** MySQL X.Y.Z
+- **banco de dados:** MySQL 8.4.3
 - **outras:**
   - npm 11.6.2 (gerenciador de pacotes do Node, instala as bibliotecas do projeto)
   - Nodemon 3.1.14 (reinicia o backend automaticamente durante o desenvolvimento)
   - Git 2.55.0.windows.5 (controle de versão do código e da documentação)
   - Visual Studio Code 1.143.1 (IDE usada para programar)
-  - Astah UML X.Y (ferramenta para os diagramas UML: casos de uso, classes, sequência, implantação)
+  - Astah UML 12.0.0 (ferramenta para os diagramas UML: casos de uso, classes, sequência, implantação)
   - Figma (prototipação das interfaces)
 
 ---
@@ -100,7 +100,6 @@ Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/
 * **`Padrões Adotados/`**: padrões que o projeto segue (ex.: regras de verificação e análise de requisitos).
 * **`Requisitos/`**: documento de requisitos, diagramas de casos de uso (Astah) e protótipos de interface.
 * **`teste/`**: casos de teste de validação e scripts de teste automatizado.
-* **`Documentos/`**: documentos de apoio do projeto.
 
 ---
 
