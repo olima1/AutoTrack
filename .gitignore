@@ -1,0 +1,33 @@
+# ===== Dependências (reinstaladas com "npm install") =====
+node_modules/
+
+# ===== Variáveis de ambiente (contêm senhas - NUNCA versionar) =====
+.env
+.env.*
+!.env.example
+
+# ===== Build do frontend =====
+dist/
+build/
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+
+# ===== Relatórios de teste/cobertura =====
+coverage/
+
+# ===== Arquivos temporários do Office =====
+~$*
+*.tmp
+
+# ===== Backups do Astah =====
+*.bak
+
+# ===== Sistema operacional e editores =====
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
