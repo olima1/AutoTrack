@@ -3,7 +3,7 @@
 Sistema web de gestão de **ordens de serviço para oficinas mecânicas**, com acompanhamento do conserto pelo cliente.
 
 > Projeto Final da disciplina **GCC188 - Engenharia de Software** (2026/2).
-> Integrante: Leandro Gabriel.
+> Integrante: Gabriel Lima Leandro.
 
 ---
 

@@ -1,6 +1,6 @@
 # Avaliação dos Requisitos — Sprint 1 (tarefa #16)
 
-**Data:** 03/11/2026 · **Avaliador:** Gabriel Lima Leandro
+**Data:** 10/11/2026 · **Avaliador:** Gabriel Lima Leandro
 **Base:** checklist da seção 3 de `Regras de Verificação e Análise de Requisitos.md` (R01–R11).
 **Método:** as regras foram verificadas por script (`check.js`) sobre os mesmos dados que geram o Documento de Requisitos, e o resultado foi conferido por leitura.
 
@@ -10,6 +10,7 @@
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | RF001 | S | S | S | S | S | - | S | S | S | S | S | Aprovado |
 | RF002 | S | S | S | S | S | - | S | S | S | S | S | Aprovado |
+| RF017 | S | S | S | S | S | - | S | S | S | S | S | Aprovado |
 | RF003 | S | S | S | S | S | - | S | S | S | S | S | Aprovado |
 | RF004 | S | S | S | S | S | - | S | S | S | S | S | Aprovado |
 | RF005 | S | S | S | S | S | - | S | S | S | S | S | Aprovado |
@@ -38,7 +39,8 @@
 | RNF012 | S | - | - | S | S | S | S | - | S | S | - | Aprovado |
 
 ## Resumo
-- 16 requisitos funcionais e 12 não funcionais avaliados; nenhum com falha nas regras R01–R11.
-- R02 e R11 (nome idêntico ao caso de uso e ligação no diagrama) dependem do diagrama do Astah: **conferir manualmente quando o diagrama (#11) estiver pronto**.
-- R03 (interface existir no protótipo) depende do Figma (#10): **conferir quando o protótipo estiver pronto**.
+- 17 requisitos funcionais e 12 não funcionais avaliados; nenhum com falha nas regras R01–R11.
+- R02 e R11 conferidos manualmente com o diagrama `Requisitos/Diagrama de Casos de Uso - AutoTrack.asta`: cada caso de uso tem nome idêntico ao do RF e está ligado a pelo menos um ator (Administrador: RF001–RF015; Cliente: RF001, RF002, RF016 e RF017). Correções feitas no diagrama durante a conferência: "Realizar Login/Logout" separado em dois casos de uso (R04), "Acompanhar status de serviços" renomeado para o nome do RF016 (R02, R10) e removida a ligação do Administrador com o RF016.
+- R03 conferido: as 39 interfaces do catálogo existem com o mesmo nome na página Protótipo do Figma (https://www.figma.com/design/vRuKwacCSuyKdjBh6kGo9H/AutoTrack).
+- RF017 (Alterar senha inicial) incluído em 10/11/2026 para cobrir o primeiro acesso do Cliente, pedido na tarefa #10. O identificador segue a regra R01: o próximo número livre, sem renumerar os demais.
 - Correções feitas durante a avaliação: termo "dono" trocado por "titular" (R10); nome do RNF001 ajustado (R04); RNF008 reescrito com valor mensurável, código HTTP 403 (R06).
