@@ -99,12 +99,128 @@ Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/
   * **`frontend/src/`**: componentes e telas da aplicação.
 * **`Padrões Adotados/`**: padrões que o projeto segue (ex.: regras de verificação e análise de requisitos).
 * **`Requisitos/`**: documento de requisitos, diagramas de casos de uso (Astah) e protótipos de interface.
+* **`Diagramas/`**: diagramas de projeto (classes, pacotes, sequência e implantação), a partir da Sprint 2.
 * **`teste/`**: casos de teste de validação e scripts de teste automatizado.
 
 ---
 
-## 6. Releases
+## 6. Regras de uso do Git
+
+Estas regras valem para todo o trabalho no repositório. Elas existem para que o histórico conte o que foi feito, por quê e em qual tarefa, e para que a `main` esteja sempre funcionando.
+
+### 6.1 Branches
+
+- A **`main`** é a versão estável do projeto. Ninguém faz commit direto nela: tudo entra por pull request.
+- Cada tarefa tem a **sua própria branch**, criada a partir da `main` atualizada.
+- O nome da branch segue o padrão **`tipo/codigo-descricao`**, em minúsculas, com hífens e sem acentos:
+
+| Tipo | Quando usar | Exemplo |
+|---|---|---|
+| `feat` | Nova funcionalidade de um requisito | `feat/rf003-cadastrar-servico` |
+| `fix` | Correção de defeito | `fix/rf005-preco-negativo` |
+| `docs` | Documentação, diagramas e requisitos | `docs/sprint2-diagrama-classes` |
+| `test` | Testes unitários ou de validação | `test/rf003-validacao-selenium` |
+| `refactor` | Melhoria de código sem mudar o comportamento | `refactor/servico-repository` |
+
+- Quando a tarefa tem um requisito, o código dele (`rf003`, `rnf006`) vem logo depois do tipo. Assim a branch se liga ao requisito e à issue do kanban.
+
+### 6.2 Commits
+
+As mensagens seguem o padrão **Conventional Commits 1.0.0** (RNF010):
+
+```
+tipo(escopo): descrição curta
+
+Corpo opcional explicando o porquê da mudança.
+
+Refs #12
+```
+
+| Tipo | Uso |
+|---|---|
+| `feat` | Nova funcionalidade |
+| `fix` | Correção de defeito |
+| `docs` | Documentação (README, requisitos, diagramas) |
+| `test` | Criação ou ajuste de testes |
+| `refactor` | Reorganização do código sem mudar o comportamento |
+| `style` | Formatação, sem mudança de lógica |
+| `chore` | Configuração, dependências e tarefas de manutenção |
+
+Regras da mensagem:
+
+1. O **escopo** é a parte do sistema afetada: `servico`, `cliente`, `ordem-servico`, `auth`, `frontend`, `readme`, `requisitos`.
+2. A **descrição** fica no presente, em português, em minúsculas, sem ponto final e com no máximo 72 caracteres. Ela completa a frase "este commit…": `adiciona`, `corrige`, `remove`.
+3. Um commit faz **uma coisa só**. Duas mudanças independentes viram dois commits.
+4. O rodapé liga o commit à issue do kanban: `Refs #12` durante a tarefa, `Closes #12` no commit que a conclui.
+5. Faça **pelo menos um commit por dia** de trabalho na branch e envie com `git push`. O GitHub também serve de backup.
+
+Exemplos:
+
+```
+feat(servico): adiciona rota POST /api/servicos
+fix(servico): impede cadastro de preço menor ou igual a zero
+docs(requisitos): adiciona RF018 Excluir cliente
+test(servico): cobre validação de nome duplicado
+chore(backend): adiciona dependência mysql2
+```
+
+### 6.3 Pull requests e merge
+
+1. Terminada a tarefa, envie a branch e abra um **pull request para a `main`**.
+2. O título do PR segue o mesmo padrão dos commits. A descrição diz o que foi feito e cita as tarefas da planilha (`#19`) e as issues (`Closes #12`).
+3. O merge é feito com **"Create a merge commit"**, sem squash, para preservar no histórico cada commit da tarefa.
+4. Depois do merge, a branch é apagada no GitHub, e a `main` local é atualizada com `git checkout main` e `git pull`.
+
+### 6.4 Kanban
+
+- Ao começar uma tarefa, mova o cartão para **Desenvolvendo**. A coluna aceita no máximo 2 itens: termine uma tarefa antes de puxar outra.
+- Com o código pronto, o cartão vai para **Teste de Sistema**. Depois do merge e dos testes, vai para **Finalizado**.
+- O título de cada issue começa pelo código do requisito (`RF003 - Cadastrar serviço - Backend`), o mesmo usado no nome da branch e nos commits.
+
+### 6.5 Tags e releases
+
+- Cada sprint termina com uma **tag anotada** e uma **Release** no GitHub, com a lista do que foi entregue.
+- O nome da tag é **`V0.<número da sprint + 1>`**: V0.1 para a Sprint 0, V0.2 para a Sprint 1, V0.3 para a Sprint 2 e V0.4 para a Sprint 3.
+- Correções depois de uma release ganham um terceiro número: `V0.2.1`.
+
+```bash
+git checkout main
+git pull
+git tag -a V0.3 -m "Sprint 2 - Projeto e Implementação"
+git push origin V0.3
+```
+
+### 6.6 Onde fica cada coisa
+
+| Pasta | Conteúdo |
+|---|---|
+| `backend/` | Código da API (Node.js/Express) |
+| `frontend/` | Código da interface (React) |
+| `teste/` | Casos de teste de validação e scripts de teste automatizado |
+| `Requisitos/` | Documento de requisitos, diagrama de casos de uso, telas e mapa de navegação |
+| `Diagramas/` | Diagramas de projeto: classes, pacotes, sequência e implantação |
+| `Padrões Adotados/` | Regras do projeto: verificação de requisitos e boas práticas de codificação |
+
+Código fica somente em `backend/`, `frontend/` e `teste/`. Documentação nunca vai dentro das pastas de código, a não ser o README de cada uma.
+
+### 6.7 O que não vai para o repositório
+
+O `.gitignore` impede que estes arquivos sejam versionados:
+
+- **`node_modules/`**: dependências, reinstaladas com `npm install`;
+- **`.env`**: senhas do banco e o segredo do JWT. Só o modelo `.env.example` é versionado;
+- **`dist/`, `build/` e `coverage/`**: arquivos gerados pela compilação e pelos testes;
+- **`*.log`**, **`~$*`** (travas do Word) e **`*.bak`** (backups do Astah);
+- arquivos do sistema e do editor, como `Thumbs.db` e `.vscode/`.
+
+O `.gitattributes` padroniza o fim de linha dos arquivos de texto. Assim o Git não acusa como "modificado" um arquivo que só mudou de CRLF (Windows) para LF.
+
+---
+
+## 7. Releases
 
 | Tag | Sprint | Conteúdo |
 |---|---|---|
 | V0.1 | Sprint 0 | Repositório, README, tecnologias, ambiente e regras de verificação de requisitos |
+| V0.2 | Sprint 1 | Documento de requisitos, casos de uso, protótipo, avaliação R01–R11 e kanban |
+| V0.2.1 | Sprint 1 | Ajuste: RF018 Excluir cliente e remoção do campo usuario_id da tabela OrdemServico |

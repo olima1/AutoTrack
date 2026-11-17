@@ -1,0 +1,11 @@
+# Padroniza o fim de linha: o Git guarda LF no repositório e converte na máquina de cada um.
+# Assim um arquivo que só mudou de CRLF (Windows) para LF não aparece como modificado.
+* text=auto
+
+# Arquivos binários: o Git não tenta comparar nem converter o conteúdo.
+*.docx binary
+*.xlsx binary
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.asta binary

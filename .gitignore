@@ -17,6 +17,14 @@ npm-debug.log*
 # ===== Relatórios de teste/cobertura =====
 coverage/
 
+# ===== Banco de dados local =====
+*.sqlite
+backup-*.sql
+
+# ===== Resultados dos testes automatizados (Selenium) =====
+teste/resultados/
+teste/screenshots/
+
 # ===== Arquivos temporários do Office =====
 ~$*
 *.tmp
