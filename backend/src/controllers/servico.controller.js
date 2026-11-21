@@ -35,10 +35,46 @@ async function cadastrar(req, res, next) {
 async function listar(req, res, next) {
   try {
     const servicos = await servicoService.listar(req.query.busca);
-    res.status(200).json({servicos});
+    res.status(200).json({ servicos });
   } catch (erro) {
     next(erro);
   }
 }
 
-module.exports = { cadastrar, listar };
+/**
+ * Busca um serviço pelo id para preencher a I_FormularioServico (RF005).
+ * Responde 200 com o serviço.
+ *
+ * @param {import('express').Request} req Requisição com o id em req.params.id.
+ * @param {import('express').Response} res Resposta HTTP.
+ * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
+ * @returns {Promise<void>}
+ */
+async function buscarPorId(req, res, next) {
+  try {
+    const servico = await servicoService.buscarPorId(req.params.id);
+    res.status(200).json(servico);
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+/**
+ * Altera um serviço (RF005).
+ * Responde 200 com a mensagem da IS_ServicoAlterado.
+ *
+ * @param {import('express').Request} req Requisição com o id em req.params.id e os dados no corpo.
+ * @param {import('express').Response} res Resposta HTTP.
+ * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
+ * @returns {Promise<void>}
+ */
+async function alterar(req, res, next) {
+  try {
+    await servicoService.alterar(req.params.id, req.body);
+    res.status(200).json({ mensagem: 'Serviço alterado com sucesso!' });
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+module.exports = { cadastrar, listar, buscarPorId, alterar };

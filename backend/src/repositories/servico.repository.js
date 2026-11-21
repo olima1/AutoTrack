@@ -48,4 +48,33 @@ async function buscarPorTrechoDoNome(texto) {
   return linhas;
 }
 
-module.exports = { buscarPorNome, inserir, buscarPorTrechoDoNome };
+/**
+ * Busca um serviço pelo id (RF005).
+ *
+ * @param {number|string} id Id do serviço.
+ * @returns {Promise<object|null>} O serviço encontrado ou null se não existir.
+ */
+async function buscarPorId(id) {
+  const [linhas] = await pool.query(
+    'SELECT * FROM Servico WHERE id = ?',
+    [id]
+  );
+  return linhas[0] ?? null;
+}
+
+/**
+ * Atualiza o nome, a descrição e o preço de um serviço (RF005).
+ * Não altera o preço já copiado para as ordens de serviço abertas (ServicoDaOrdem).
+ *
+ * @param {number|string} id Id do serviço.
+ * @param {{ nome: string, descricao: string|null, preco: number }} servico Dados novos do serviço.
+ * @returns {Promise<void>}
+ */
+async function atualizar(id, servico) {
+  await pool.query(
+    'UPDATE Servico SET nome = ?, descricao = ?, preco = ? WHERE id = ?',
+    [servico.nome, servico.descricao, servico.preco, id]
+  );
+}
+
+module.exports = { buscarPorNome, inserir, buscarPorTrechoDoNome, buscarPorId, atualizar };
