@@ -7,6 +7,8 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const servicoRoutes = require('./routes/servico.routes');
+const tratarErros = require('./middlewares/tratarErros');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +24,11 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', mensagem: 'API AutoTrack em execução' });
 });
+
+app.use('/api/servicos', servicoRoutes);
+
+// O middleware de erros precisa ser o último app.use.
+app.use(tratarErros);
 
 app.listen(PORT, () => {
   console.log(`API AutoTrack rodando em http://localhost:${PORT}`);
