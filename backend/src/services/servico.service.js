@@ -3,7 +3,7 @@
  * Valida os dados recebidos do controller e usa o repository para acessar o banco.
  */
 const servicoRepository = require('../repositories/servico.repository');
-const { ErroValidacao, ErroNegocio } = require('../erros');
+const { ErroValidacao, ErroNegocio, ErroNaoEncontrado } = require('../erros');
 const { TAMANHO_MAXIMO_NOME_SERVICO, TAMANHO_MAXIMO_DESCRICAO_SERVICO } = require('../constantes');
 
 /** Preço com no máximo duas casas decimais, como 150, 150.5 ou 150.50. */
@@ -60,7 +60,7 @@ function validarPreco(preco) {
  * @param {{ nome?: string, descricao?: string, preco?: number|string }} dados Dados recebidos do formulário.
  * @throws {ErroValidacao} Quando algum dado for inválido.
  */
-function validarDados(dados) {
+function validarDados(dados = {}) {
   validarObrigatorios(dados);
   validarPreco(dados.preco);
   validarTamanhos(dados);
@@ -111,4 +111,43 @@ async function listar(texto) {
   return servicos;
 }
 
-module.exports = { cadastrar, validarDados, listar };
+/**
+ * Busca um serviço pelo id; usado para preencher o formulário de alteração (RF005).
+ *
+ * @param {number|string} id Id do serviço.
+ * @returns {Promise<object>} O serviço encontrado.
+ * @throws {ErroNaoEncontrado} Quando não existir serviço com esse id.
+ */
+async function buscarPorId(id) {
+  const servico = await servicoRepository.buscarPorId(id);
+  if (!servico) {
+    throw new ErroNaoEncontrado('Serviço não encontrado.');
+  }
+  return servico;
+}
+
+/**
+ * Altera um serviço do catálogo (RF005).
+ * O nome continua único: só é duplicado se pertencer a outro serviço.
+ *
+ * @param {number|string} id Id do serviço a alterar.
+ * @param {{ nome?: string, descricao?: string, preco?: number|string }} dados Dados recebidos do formulário.
+ * @returns {Promise<void>}
+ * @throws {ErroValidacao} Quando algum dado for inválido.
+ * @throws {ErroNaoEncontrado} Quando não existir serviço com esse id.
+ * @throws {ErroNegocio} Quando o nome já pertencer a outro serviço.
+ */
+async function alterar(id, dados) {
+  validarDados(dados);
+  const servico = prepararServico(dados);
+
+  buscarPorId(id);
+
+  const servicoExistente = await servicoRepository.buscarPorNome(servico.nome);
+  if (servicoExistente && servicoExistente.id !== Number(id)) {
+    throw new ErroNegocio('Serviço não encontrado.')
+  }
+  await servicoRepository.atualizar(id, servico);
+}
+
+module.exports = { cadastrar, validarDados, listar, buscarPorId, alterar };
