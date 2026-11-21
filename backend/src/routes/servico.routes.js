@@ -10,4 +10,6 @@ const router = express.Router();
 
 router.post('/', servicoController.cadastrar);
 
+router.get('/', servicoController.listar);
+
 module.exports = router;

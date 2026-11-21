@@ -33,4 +33,19 @@ async function inserir(servico) {
   return resultado.insertId;
 }
 
-module.exports = { buscarPorNome, inserir };
+/**
+ * Busca os serviços cujo nome contém o texto, sem diferenciar maiúsculas de minúsculas (RF004).
+ * Com texto vazio, devolve todos os serviços.
+ *
+ * @param {string} texto Trecho do nome a procurar.
+ * @returns {Promise<object[]>} Serviços encontrados, em ordem alfabética (lista vazia se nenhum).
+ */
+async function buscarPorTrechoDoNome(texto) {
+  const [linhas] = await pool.query(
+    'SELECT * FROM Servico WHERE LOWER(nome) LIKE LOWER(?) ORDER BY nome',
+    ['%' + texto + '%']
+  );
+  return linhas;
+}
+
+module.exports = { buscarPorNome, inserir, buscarPorTrechoDoNome };

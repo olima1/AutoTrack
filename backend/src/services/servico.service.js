@@ -29,7 +29,7 @@ function validarObrigatorios(dados) {
  * @throws {ErroValidacao} Quando o nome ou a descrição passarem do tamanho máximo.
  */
 function validarTamanhos(dados) {
-  if(dados.nome.trim().length > TAMANHO_MAXIMO_NOME_SERVICO){
+  if (dados.nome.trim().length > TAMANHO_MAXIMO_NOME_SERVICO) {
     throw new ErroValidacao('O nome deve ter no máximo ${TAMANHO_MAXIMO_NOME_SERVICO} caracteres.');
   }
   if (dados.descricao && dados.descricao.trim().length > TAMANHO_MAXIMO_DESCRICAO_SERVICO) {
@@ -48,7 +48,7 @@ function validarPreco(preco) {
   if (!Number.isFinite(valor) || valor <= 0) {
     throw new ErroValidacao('O preço deve ser maior que R$ 0,00');
   }
-  if(!FORMATO_PRECO.test(String(preco))){
+  if (!FORMATO_PRECO.test(String(preco))) {
     throw new ErroValidacao('O preço deve ter no máximo duas casas decimais.');
   }
 }
@@ -73,8 +73,8 @@ function validarDados(dados) {
  * @param {{ nome: string, descricao?: string, preco: number|string }} dados Dados já validados.
  * @returns {{ nome: string, descricao: string|null, preco: number }} Serviço pronto para gravar.
  */
-function preparaServico(dados){
-  return{
+function prepararServico(dados) {
+  return {
     nome: dados.nome.trim(),
     descricao: dados.descricao?.trim() || null,
     preco: Number(dados.preco),
@@ -91,7 +91,7 @@ function preparaServico(dados){
  */
 async function cadastrar(dados) {
   validarDados(dados);
-  const servico = preparaServico(dados);
+  const servico = prepararServico(dados);
   const servicoExistente = await servicoRepository.buscarPorNome(servico.nome);
   if (servicoExistente != null) {
     throw new ErroNegocio('Já existe um serviço com este nome.');
@@ -99,4 +99,16 @@ async function cadastrar(dados) {
   return servicoRepository.inserir(servico);
 }
 
-module.exports = { cadastrar, validarDados };
+/**
+ * Lista os serviços do catálogo, filtrando pelo trecho do nome (RF004).
+ *
+ * @param {string} [texto] Trecho do nome digitado na pesquisa (opcional).
+ * @returns {Promise<object[]>} Serviços encontrados (lista vazia se nenhum).
+ */
+async function listar(texto) {
+  const busca = (texto ?? '').trim();
+  const servicos = await servicoRepository.buscarPorTrechoDoNome(busca);
+  return servicos;
+}
+
+module.exports = { cadastrar, validarDados, listar };
