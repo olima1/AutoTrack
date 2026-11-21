@@ -76,7 +76,7 @@ function validarDados(dados) {
 function preparaServico(dados){
   return{
     nome: dados.nome.trim(),
-    descricao: dados.descricao.trim() || null,
+    descricao: dados.descricao?.trim() || null,
     preco: Number(dados.preco),
   };
 }
@@ -92,7 +92,7 @@ function preparaServico(dados){
 async function cadastrar(dados) {
   validarDados(dados);
   const servico = preparaServico(dados);
-  const servicoExistente = await servicoRepository.buscarPorNome(dados.nome);
+  const servicoExistente = await servicoRepository.buscarPorNome(servico.nome);
   if (servicoExistente != null) {
     throw new ErroNegocio('Já existe um serviço com este nome.');
   }
