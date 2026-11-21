@@ -7,4 +7,7 @@
 /** Tamanho máximo do nome do serviço, igual ao VARCHAR(60) da tabela Servico. */
 const TAMANHO_MAXIMO_NOME_SERVICO = 60;
 
-module.exports = { TAMANHO_MAXIMO_NOME_SERVICO };
+/** Tamanho máximo da descrição do serviço, igual ao VARCHAR(255) da tabela Servico. */
+const TAMANHO_MAXIMO_DESCRICAO_SERVICO = 255;
+
+module.exports = { TAMANHO_MAXIMO_NOME_SERVICO, TAMANHO_MAXIMO_DESCRICAO_SERVICO };
