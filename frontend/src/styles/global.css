@@ -255,3 +255,96 @@ h1 {
   margin: 0;
   text-align: center;
 }
+
+/* ---------- Formulário ---------- */
+.formulario {
+  max-width: 720px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formulario .alerta-erro {
+  margin: 0;
+}
+
+.rotulo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--grafite-700);
+}
+
+.rotulo-curto {
+  max-width: 240px;
+}
+
+textarea.campo {
+  resize: vertical;
+}
+
+.campo-erro {
+  border-color: var(--erro-700);
+  background: var(--erro-100);
+}
+
+.formulario-botoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ---------- Janelas IS_ e IE_ ---------- */
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 41, 51, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10;
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--branco);
+  border-radius: 12px;
+  border-top: 4px solid var(--grafite-300);
+  padding: 24px;
+}
+
+.modal-sucesso {
+  border-top-color: var(--sucesso-700);
+}
+
+.modal-erro {
+  border-top-color: var(--erro-700);
+}
+
+.modal h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.modal-sucesso h2 {
+  color: var(--sucesso-700);
+}
+
+.modal-erro h2 {
+  color: var(--erro-700);
+}
+
+.modal p {
+  margin: 0 0 20px;
+  color: var(--grafite-700);
+}
+
+.modal-botoes {
+  display: flex;
+  justify-content: flex-end;
+}
