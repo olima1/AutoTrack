@@ -77,4 +77,28 @@ async function atualizar(id, servico) {
   );
 }
 
-module.exports = { buscarPorNome, inserir, buscarPorTrechoDoNome, buscarPorId, atualizar };
+/**
+ * Verifica se o serviço aparece em alguma ordem de serviço (RF006).
+ *
+ * @param {number|string} id Id do serviço.
+ * @returns {Promise<boolean>} true se o serviço estiver em uso.
+ */
+async function estaEmUso(id) {
+  const [linhas] = await pool.query(
+    'SELECT COUNT(*) AS quantidade FROM ServicoDaOrdem WHERE servico_id = ?',
+    [id],
+  );
+  return linhas[0].quantidade > 0;
+}
+
+/**
+ * Exclui um serviço do catálogo (RF006).
+ *
+ * @param {number|string} id Id do serviço.
+ * @returns {Promise<void>}
+ */
+async function excluir(id) {
+  await pool.query('DELETE FROM Servico WHERE id = ?', [id]);
+}
+
+module.exports = { buscarPorNome, inserir, buscarPorTrechoDoNome, buscarPorId, atualizar, estaEmUso, excluir };

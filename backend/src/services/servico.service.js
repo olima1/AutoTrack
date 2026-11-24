@@ -150,4 +150,20 @@ async function alterar(id, dados) {
   await servicoRepository.atualizar(id, servico);
 }
 
-module.exports = { cadastrar, validarDados, listar, buscarPorId, alterar };
+/**
+ * Exclui um serviço do catálogo, se ele nunca foi usado em uma ordem de serviço (RF006).
+ *
+ * @param {number|string} id Id do serviço.
+ * @returns {Promise<void>}
+ * @throws {ErroNaoEncontrado} Quando não existir serviço com esse id.
+ * @throws {ErroNegocio} Quando o serviço estiver vinculado a uma ordem de serviço.
+ */
+async function excluir(id) {
+  await buscarPorId(id);
+  if (await servicoRepository.estaEmUso(id)) {
+    throw new ErroNegocio('Serviço vinculado a ordens de serviço não pode ser excluído.');
+  }
+  await servicoRepository.excluir(id);
+}
+
+module.exports = { cadastrar, validarDados, listar, buscarPorId, alterar, excluir };
