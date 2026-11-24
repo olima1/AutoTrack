@@ -4,8 +4,42 @@
  */
 
 import axios from 'axios';
+import { lerToken, encerrarSessao } from './sessao';
 
 const api = axios.create({ baseURL: 'http://localhost:3001/api' });
+
+// Antes de cada requisição: se houver token, envia no cabeçalho Authorization (RNF007).
+api.interceptors.request.use((config) => {
+  const token = lerToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Depois de cada resposta: 401 fora do login = sessão expirada, volta para a tela de login.
+api.interceptors.response.use(
+  (resposta) => resposta,
+  (erro) => {
+    const ehLogin = erro.config?.url === '/auth/login';
+    if (erro.response?.status === 401 && !ehLogin) {
+      encerrarSessao();
+      window.location.href = '/login';
+    }
+    return Promise.reject(erro);
+  }
+);
+
+/**
+ * Faz login (RF001).
+ *
+ * @param {{ email: string, senha: string }} credenciais E-mail e senha digitados.
+ * @returns {Promise<{ token: string, perfil: string, primeiroAcesso: boolean }>} Dados da sessão.
+ */
+export async function fazerLogin(credenciais) {
+  const resposta = await api.post('/auth/login', credenciais);
+  return resposta.data;
+}
 
 /**
  * Lista os serviços, com filtro opcional pelo nome (RF004).

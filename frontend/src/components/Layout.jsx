@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { encerrarSessao } from '../services/sessao.js';
 
 /**
  * Moldura das telas do Administrador: menu lateral e área de conteúdo.
@@ -7,6 +8,14 @@ import { NavLink, Outlet } from 'react-router-dom';
  * @returns {JSX.Element}
  */
 function Layout() {
+  const navigate = useNavigate();
+
+  /** Encerra a sessão e volta para a tela de login (RF002). */
+  function sair() {
+    encerrarSessao();
+    navigate('/login', { replace: true });
+  }
+
   return (
     <div className="layout">
       <aside className="menu">
@@ -26,7 +35,7 @@ function Layout() {
               <small>Administrador</small>
             </div>
           </div>
-            <button type="button" className="menu-item">Sair</button>
+          <button type="button" className="menu-item" onClick={sair}>Sair</button>
         </div>
       </aside>
       <main className="conteudo">

@@ -373,3 +373,41 @@ textarea.campo {
 .botao-perigo:hover {
   background: var(--erro-100);
 }
+
+/* ---------- Login ---------- */
+.login-pagina {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--grafite-100);
+}
+
+.login-cartao {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px;
+  background: var(--branco);
+  border: 1px solid var(--grafite-300);
+  border-radius: 12px;
+}
+
+.login-logo {
+  margin: 0;
+  font-size: 28px;
+  color: var(--primaria-600);
+  text-align: center;
+}
+
+.login-subtitulo {
+  margin: 0 0 12px;
+  color: var(--grafite-500);
+  text-align: center;
+}
+
+.login-cartao .botao {
+  margin-top: 12px;
+}
