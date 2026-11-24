@@ -1,0 +1,110 @@
+:root {
+  --grafite-900: #1F2933;
+  --grafite-700: #3E4C59;
+  --grafite-500: #7B8794;
+  --grafite-300: #CBD2D9;
+  --grafite-100: #EEF1F4;
+  --grafite-50: #F7F8FA;
+  --branco: #FFFFFF;
+  --primaria-600: #C2410C;
+  --primaria-700: #9A3412;
+  --primaria-100: #FFEDD5;
+  --sucesso-700: #15803D;
+  --sucesso-100: #DCFCE7;
+  --erro-700: #B91C1C;
+  --erro-100: #FEE2E2;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--grafite-900);
+  background-color: var(--grafite-50);
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+.menu {
+  width: 248px;
+  flex-shrink: 0;
+  background: var(--grafite-900);
+  color: var(--branco);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.menu-logo {
+  font-size: 20px; 
+  font-weight: 700;
+  margin-bottom: 24px;
+  padding: 0 12px;
+}
+.menu-itens {
+  display: flex;
+  flex-direction: column; 
+  gap: 4px;
+}
+.menu-item {
+  display: block;
+  padding: 10px 12px; 
+  border-radius: 8px; 
+  color: var(--grafite-300); 
+  text-decoration: none; 
+  font-weight: 500; 
+  background: none; 
+  border: none; 
+  text-align: left; 
+  font: inherit; 
+  cursor: pointer; 
+  width: 100%;
+}
+.menu-item:hover {
+  background: var(--grafite-700); 
+  color: var(--branco);
+}
+.menu-item.active {
+  background: var(--primaria-100); 
+  color: var(--primaria-700);
+}
+.menu-rodape {
+  margin-top: auto; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 4px;
+}
+.menu-usuario {
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  padding: 12px; 
+  border-radius: 10px; 
+  background: var(--grafite-700);
+}
+.menu-usuario small {
+  display: block; 
+  color: var(--grafite-300);
+}
+.menu-avatar {
+  width: 32px; 
+  height: 32px; 
+  border-radius: 50%; 
+  background: var(--primaria-100); 
+  color: var(--primaria-700); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-weight: 600;
+}
+.conteudo {
+  padding: 32px 40px;
+}
