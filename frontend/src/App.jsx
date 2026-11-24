@@ -1,23 +1,28 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
+import RotaProtegida from './components/RotaProtegida.jsx';
+import Login from './pages/Login.jsx';
 import ListagemServicos from './pages/ListagemServicos.jsx';
 import FormularioServico from './pages/FormularioServico.jsx';
 
 /**
- * Rotas do frontend. As telas do Administrador usam o Layout (menu lateral).
- * Qualquer endereço desconhecido volta para a listagem de serviços.
+ * Rotas do frontend. /login é pública; as demais exigem sessão (RotaProtegida)
+ * e usam o Layout com menu lateral. Endereço desconhecido vai para o login.
  *
  * @returns {JSX.Element}
  */
 function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route path="/servicos" element={<ListagemServicos />} />
-        <Route path="/servicos/novo" element={<FormularioServico />}/>
-        <Route path="/servicos/:id/editar" element={<FormularioServico />} />
+      <Route path="/login" element={<Login />} />
+      <Route element={<RotaProtegida />}>
+        <Route element={<Layout />}>
+          <Route path="/servicos" element={<ListagemServicos />} />
+          <Route path="/servicos/novo" element={<FormularioServico />} />
+          <Route path="/servicos/:id/editar" element={<FormularioServico />} />
+        </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/servicos" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

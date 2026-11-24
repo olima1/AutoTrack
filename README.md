@@ -33,11 +33,12 @@ Todo acesso ao sistema exige login.
 Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/downloads/) instalados (versões na seção 4).
 
 1. Baixe o projeto: botão **Code → Download ZIP** no GitHub e extraia, ou `git clone https://github.com/olima1/AutoTrack.git`.
-2. Crie o banco de dados no MySQL:
-   ```sql
-   CREATE DATABASE autotrack;
-   ```
-3. Configure o backend: dentro da pasta `backend`, copie o arquivo `.env.example` para `.env` e preencha usuário e senha do seu MySQL.
+2. Crie o banco de dados e as tabelas: no MySQL (Workbench, phpMyAdmin ou terminal), execute na ordem os arquivos da pasta `backend/database`:
+   1. `schema.sql`: cria o banco `autotrack` e as tabelas;
+   2. `dados-iniciais.sql`: cria o usuário Administrador inicial.
+3. Configure o backend: dentro da pasta `backend`, copie o arquivo `.env.example` para `.env` e preencha:
+   - `DB_USER` e `DB_PASSWORD`: usuário e senha do seu MySQL;
+   - `JWT_SECRET`: qualquer texto longo, usado para assinar os tokens de login.
 4. Inicie o backend (terminal 1):
    ```bash
    cd backend
@@ -51,7 +52,11 @@ Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/
    npm install
    npm run dev
    ```
-6. Abra o navegador em **http://localhost:5173**.
+6. Abra o navegador em **http://localhost:5173** e entre com o Administrador inicial:
+
+   | E-mail | Senha |
+   |---|---|
+   | admin@autotrack.com | AutoTrackAdmin |
 
 ---
 
@@ -68,7 +73,7 @@ Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/
    cd backend && npm install
    cd ../frontend && npm install
    ```
-3. Crie o arquivo `backend/.env` a partir de `backend/.env.example`.
+3. Execute `backend/database/schema.sql` e `backend/database/dados-iniciais.sql` no MySQL e crie o arquivo `backend/.env` a partir de `backend/.env.example` (incluindo `JWT_SECRET`).
 4. Rode o backend em modo desenvolvimento (reinicia ao salvar): `cd backend && npm run dev`.
 5. Rode o frontend: `cd frontend && npm run dev` e acesse **http://localhost:5173**.
 6. Teste a API: **http://localhost:3001/api/health** deve responder `{"status":"ok", ...}`.
@@ -79,7 +84,7 @@ Pré-requisitos: [Node.js](https://nodejs.org/) e [MySQL](https://dev.mysql.com/
 
 - **frontend:** React 19.3.1, React Router DOM 7.18.4, Axios 1.21.0, Vite 8.3.5
 - **backend:** Node.js 24.13.0, Express 5.3.0, mysql2 3.24.6, bcryptjs 3.0.3, jsonwebtoken 9.0.3, cors 2.8.6, dotenv 18.0.9
-- **banco de dados:** MySQL 8.4.3
+- **banco de dados:** MySQL 8.4.3 (testado também com MariaDB do XAMPP)
 - **outras:**
   - npm 11.6.2 (gerenciador de pacotes do Node, instala as bibliotecas do projeto)
   - Nodemon 3.1.14 (reinicia o backend automaticamente durante o desenvolvimento)

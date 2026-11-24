@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS autotrack;
+USE autotrack;
+
 CREATE TABLE Servico (
     id INT NOT NULL AUTO_INCREMENT,
     nome VARCHAR(60) NOT NULL UNIQUE,
@@ -53,7 +56,7 @@ CREATE TABLE OrdemServico (
   FOREIGN KEY (cliente_id) REFERENCES Cliente (id),
   FOREIGN KEY (veiculo_id) REFERENCES Veiculo (id),
   CHECK (valor_total >= 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE ServicoDaOrdem (
   ordem_servico_id INT NOT NULL,

@@ -36,4 +36,26 @@ class ErroNegocio extends Error {
   }
 }
 
-module.exports = { ErroValidacao, ErroNaoEncontrado, ErroNegocio };
+/**
+ * Erro lançado quando o usuário não está logado, a sessão expirou ou as credenciais estão incorretas.
+ */
+class ErroNaoAutenticado extends Error {
+  constructor(mensagem) {
+    super(mensagem);
+    this.name = 'ErroNaoAutenticado';
+    this.statusHttp = 401;
+  }
+}
+
+/**
+ * Erro lançado quando o usuário está logado, mas o perfil dele não pode acessar o recurso.
+ */
+class ErroAcessoNegado extends Error {
+  constructor(mensagem) {
+    super(mensagem);
+    this.name = 'ErroAcessoNegado';
+    this.statusHttp = 403;
+  }
+}
+
+module.exports = { ErroValidacao, ErroNaoEncontrado, ErroNegocio, ErroAcessoNegado, ErroNaoAutenticado };

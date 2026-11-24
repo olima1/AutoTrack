@@ -8,6 +8,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const servicoRoutes = require('./routes/servico.routes');
+const authRoutes = require('./routes/auth.routes')
 const tratarErros = require('./middlewares/tratarErros');
 
 const app = express();
@@ -26,6 +27,8 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/servicos', servicoRoutes);
+
+app.use('/api/auth', authRoutes);
 
 // O middleware de erros precisa ser o último app.use.
 app.use(tratarErros);
