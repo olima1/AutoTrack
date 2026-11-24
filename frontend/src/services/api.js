@@ -51,3 +51,25 @@ export async function alterarServico(id, dados) {
   const resposta = await api.put(`/servicos/${id}`, dados);
   return resposta.data;
 }
+
+/**
+ * Exclui um serviço (RF006).
+ *
+ * @param {number|string} id Id do serviço.
+ * @returns {Promise<{ mensagem: string }>} Mensagem de sucesso.
+ */
+export async function excluirServico(id) {
+  const resposta = await api.delete(`/servicos/${id}`);
+  return resposta.data;
+}
+
+/**
+ * Lê a mensagem de erro enviada pela API no formato { erro: '...' } (BP06).
+ * Se a API nem respondeu, devolve uma mensagem genérica.
+ *
+ * @param {object} erro Erro lançado pelo axios.
+ * @returns {string} Mensagem para o usuário.
+ */
+export function lerMensagemDeErro(erro) {
+  return erro.response?.data?.erro ?? 'Não foi possível falar com a API. Verifique se ela está no ar.';
+}

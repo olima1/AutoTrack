@@ -348,3 +348,28 @@ textarea.campo {
   display: flex;
   justify-content: flex-end;
 }
+
+.modal-perigo {
+  border-top-color: var(--erro-700);
+}
+
+.modal-perigo h2 {
+  color: var(--erro-700);
+}
+
+.modal-botoes {
+  gap: 8px;
+}
+
+.botao-perigo-cheio {
+  background: var(--erro-700);
+  color: var(--branco);
+}
+
+.botao-perigo-cheio:hover {
+  background: #991B1B;
+}
+
+.botao-perigo:hover {
+  background: var(--erro-100);
+}

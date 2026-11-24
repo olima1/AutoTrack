@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { listarServicos } from '../services/api';
+import Modal from '../components/Modal';
+import { excluirServico, lerMensagemDeErro, listarServicos } from '../services/api';
 
 /**
  * Formata um preço vindo do banco ("150.00") em reais ("R$ 150,00").
@@ -23,6 +24,9 @@ function ListagemServicos() {
   const [busca, setBusca] = useState('');
   const [erro, setErro] = useState('');
 
+  const [servicoParaExcluir, setServicosParaExcluir] = useState(null);
+  const [janela, setJanela] = useState(null);
+
   // Busca de novo a cada letra digitada.
   useEffect(() => {
     listarServicos(busca)
@@ -33,6 +37,24 @@ function ListagemServicos() {
       .catch(() => setErro('Não foi possível carregar os serviços. Verifique se a API está no ar.'));
   }, [busca]);
 
+  /**
+ * Interface I_ListagemServicos (RF004 e RF006).
+ * Lista os serviços do catálogo, com busca pelo nome, leva ao cadastro e à alteração,
+ * e exclui serviços com confirmação.
+ *
+ * @returns {JSX.Element}
+ */
+  async function confirmarExclusao() {
+    const servico = servicoParaExcluir;
+    setServicosParaExcluir(null);
+    try {
+      const resposta = await excluirServico(servico.id);
+      setServicos(servicos.filter((item) => item.id !== servico.id));
+      setJanela({ tipo: 'sucesso', titulo: 'Serviço excluído', mensagem: resposta.mensagem });
+    } catch (erro) {
+      setJanela({ tipo: 'erro', titulo: 'Não foi possível excluir', mensagem: lerMensagemDeErro(erro) });
+    }
+  }
   return (
     <>
       <div className="pagina-cabecalho">
@@ -80,7 +102,7 @@ function ListagemServicos() {
                       >
                         Editar
                       </Link>
-                      <button type="button" className="botao botao-perigo botao-pequeno" disabled>
+                      <button type="button" className="botao botao-perigo botao-pequeno" onClick={() => setServicosParaExcluir(servico)}>
                         Excluir
                       </button>
                     </div>
@@ -91,6 +113,24 @@ function ListagemServicos() {
           </table>
         )}
       </div>
+      {servicoParaExcluir && (
+        <Modal
+          tipo="perigo"
+          titulo="Excluir serviço?"
+          mensagem={`O serviço "${servicoParaExcluir.nome}" será excluído do catálogo. Esta ação não pode ser desfeita.`}
+        >
+          <button type="button" className="botao botao-secundario" onClick={() => setServicosParaExcluir(null)}>
+            Cancelar
+          </button>
+          <button type="button" className="botao botao-perigo-cheio" onClick={confirmarExclusao}>
+            Confirmar exclusão
+          </button>
+        </Modal>
+      )}
+
+      {janela && (
+        <Modal tipo={janela.tipo} titulo={janela.titulo} mensagem={janela.mensagem} onFechar={() => setJanela(null)} />
+      )}
     </>
   );
 }
