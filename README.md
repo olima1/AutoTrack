@@ -229,3 +229,4 @@ O `.gitattributes` padroniza o fim de linha dos arquivos de texto. Assim o Git n
 | V0.1 | Sprint 0 | Repositório, README, tecnologias, ambiente e regras de verificação de requisitos |
 | V0.2 | Sprint 1 | Documento de requisitos, casos de uso, protótipo, avaliação R01–R11 e kanban |
 | V0.2.1 | Sprint 1 | Ajuste: RF018 Excluir cliente e remoção do campo usuario_id da tabela OrdemServico |
+| V0.3 | Sprint 2 | Diagramas de classes, pacotes, sequência e implantação, regras do Git, boas práticas, login/logout e CRUD de Serviço |
