@@ -108,3 +108,10 @@ body {
 .conteudo {
   padding: 32px 40px;
 }
+.alerta-erro {
+  background: var(--erro-100);
+  color: var(--erro-700);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-weight: 500;
+}
