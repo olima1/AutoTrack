@@ -72,16 +72,18 @@ function ListagemServicos() {
                   <td>{servico.nome}</td>
                   <td>{servico.descricao || '—'}</td>
                   <td>{formatarPreco(servico.preco)}</td>
-                  <td className="acoes">
-                    <Link
-                      to={`/servicos/${servico.id}/editar`}
-                      className="botao botao-secundario botao-pequeno"
-                    >
-                      Editar
-                    </Link>
-                    <button type="button" className="botao botao-perigo botao-pequeno" disabled>
-                      Excluir
-                    </button>
+                  <td>
+                    <div className="acoes">
+                      <Link
+                        to={`/servicos/${servico.id}/editar`}
+                        className="botao botao-secundario botao-pequeno"
+                      >
+                        Editar
+                      </Link>
+                      <button type="button" className="botao botao-perigo botao-pequeno" disabled>
+                        Excluir
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

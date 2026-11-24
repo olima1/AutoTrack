@@ -3,7 +3,7 @@
  * As páginas usam estas funções e nunca chamam o axios diretamente.
  */
 
-import axios from "axios";
+import axios from 'axios';
 
 const api = axios.create({ baseURL: 'http://localhost:3001/api' });
 

@@ -33,6 +33,7 @@ body {
   display: flex;
   min-height: 100vh;
 }
+
 .menu {
   width: 248px;
   flex-shrink: 0;
@@ -43,75 +44,214 @@ body {
   flex-direction: column;
   gap: 4px;
 }
+
 .menu-logo {
-  font-size: 20px; 
+  font-size: 20px;
   font-weight: 700;
   margin-bottom: 24px;
   padding: 0 12px;
 }
+
 .menu-itens {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   gap: 4px;
 }
+
 .menu-item {
   display: block;
-  padding: 10px 12px; 
-  border-radius: 8px; 
-  color: var(--grafite-300); 
-  text-decoration: none; 
-  font-weight: 500; 
-  background: none; 
-  border: none; 
-  text-align: left; 
-  font: inherit; 
-  cursor: pointer; 
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--grafite-300);
+  text-decoration: none;
+  font-weight: 500;
+  background: none;
+  border: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
   width: 100%;
 }
+
 .menu-item:hover {
-  background: var(--grafite-700); 
+  background: var(--grafite-700);
   color: var(--branco);
 }
+
 .menu-item.active {
-  background: var(--primaria-100); 
+  background: var(--primaria-100);
   color: var(--primaria-700);
 }
+
 .menu-rodape {
-  margin-top: auto; 
-  display: flex; 
-  flex-direction: column; 
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
   gap: 4px;
 }
+
 .menu-usuario {
-  display: flex; 
-  align-items: center; 
-  gap: 10px; 
-  padding: 12px; 
-  border-radius: 10px; 
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
   background: var(--grafite-700);
 }
+
 .menu-usuario small {
-  display: block; 
+  display: block;
   color: var(--grafite-300);
 }
+
 .menu-avatar {
-  width: 32px; 
-  height: 32px; 
-  border-radius: 50%; 
-  background: var(--primaria-100); 
-  color: var(--primaria-700); 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primaria-100);
+  color: var(--primaria-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 600;
 }
+
 .conteudo {
   padding: 32px 40px;
 }
+
 .alerta-erro {
   background: var(--erro-100);
   color: var(--erro-700);
   padding: 10px 12px;
   border-radius: 8px;
   font-weight: 500;
+}
+
+/* ---------- Cabeçalho das páginas ---------- */
+.pagina-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+h1 {
+  font-size: 28px;
+  line-height: 36px;
+  margin: 0;
+}
+
+.subtitulo {
+  color: var(--grafite-500);
+  margin: 4px 0 0;
+}
+
+/* ---------- Botões ---------- */
+.botao {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.botao-primario {
+  background: var(--primaria-600);
+  color: var(--branco);
+}
+
+.botao-primario:hover {
+  background: var(--primaria-700);
+}
+
+.botao-secundario {
+  background: var(--branco);
+  color: var(--grafite-900);
+  border-color: var(--grafite-300);
+}
+
+.botao-secundario:hover {
+  background: var(--grafite-50);
+}
+
+.botao-perigo {
+  background: var(--branco);
+  color: var(--erro-700);
+  border-color: var(--erro-100);
+}
+
+.botao-pequeno {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.botao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Campos ---------- */
+.campo {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--grafite-300);
+  border-radius: 8px;
+  font: inherit;
+  background: var(--branco);
+  color: var(--grafite-900);
+}
+
+.campo:focus {
+  outline: 2px solid var(--primaria-100);
+  border-color: var(--primaria-600);
+}
+
+.campo-busca {
+  max-width: 360px;
+  margin-bottom: 16px;
+}
+
+/* ---------- Cartão e tabela ---------- */
+.cartao {
+  background: var(--branco);
+  border: 1px solid var(--grafite-100);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela th {
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--grafite-50);
+  color: var(--grafite-500);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tabela td {
+  padding: 12px 16px;
+  border-top: 1px solid var(--grafite-100);
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.vazio {
+  color: var(--grafite-500);
+  padding: 24px;
+  margin: 0;
+  text-align: center;
 }
