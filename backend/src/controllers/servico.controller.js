@@ -35,7 +35,7 @@ async function cadastrar(req, res, next) {
 async function listar(req, res, next) {
   try {
     const servicos = await servicoService.listar(req.query.busca);
-    res.status(200).json({ servicos });
+    res.status(200).json( servicos );
   } catch (erro) {
     next(erro);
   }

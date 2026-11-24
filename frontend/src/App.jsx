@@ -1,30 +1,21 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-
-const URL_API = 'http://localhost:3001/api';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/Layout.jsx';
+import ListagemServicos from './pages/ListagemServicos.jsx';
 
 /**
- * Tela inicial provisória (Sprint 0).
- * Apenas confirma que o frontend está no ar e consegue falar com a API.
+ * Rotas do frontend. As telas do Administrador usam o Layout (menu lateral).
+ * Qualquer endereço desconhecido volta para a listagem de serviços.
+ *
+ * @returns {JSX.Element}
  */
 function App() {
-  const [statusApi, setStatusApi] = useState('verificando...');
-
-  useEffect(() => {
-    axios
-      .get(`${URL_API}/health`)
-      .then((resposta) => setStatusApi(resposta.data.mensagem))
-      .catch(() => setStatusApi('API fora do ar - inicie o backend'));
-  }, []);
-
   return (
-    <main style={{ fontFamily: 'sans-serif', padding: 32 }}>
-      <h1>AutoTrack</h1>
-      <p>Gestão de ordens de serviço para oficinas mecânicas.</p>
-      <p>
-        Status da API: <strong>{statusApi}</strong>
-      </p>
-    </main>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path='/servicos' element={<ListagemServicos />} />
+      </Route>
+      <Route path='*' element={<Navigate to="/servicos" replace />} />
+    </Routes>
   );
 }
 
