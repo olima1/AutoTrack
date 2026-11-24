@@ -2,23 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Modal from "../components/Modal";
 import { alterarServico, buscarServico, cadastrarServico } from "../services/api";
+import { lerMensagemDeErro } from "../services/api";
 
 /** Mensagem da interface IE_CamposObrigatorios. */
 const MENSAGEM_CAMPOS_OBRIGATORIOS = 'Preencha todos os campos obrigatórios.'
 
 /** Campos que precisam estar preenchidos antes de enviar. */
 const CAMPOS_OBRIGATORIOS = ['nome', 'preco'];
-
-/**
- * Lê a mensagem de erro enviada pela API no formato { erro: '...' } (BP06).
- * Se a API nem respondeu, devolve uma mensagem genérica.
- *
- * @param {object} erro Erro lançado pelo axios.
- * @returns {string} Mensagem para o usuário.
- */
-function lerMensagemDeErro(erro) {
-  return erro.response?.data?.erro ?? 'Não foi possível falar com a API.';
-}
 
 /**
  * Interface I_FormularioServico.
