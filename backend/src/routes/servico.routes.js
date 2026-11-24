@@ -12,4 +12,8 @@ router.post('/', servicoController.cadastrar);
 
 router.get('/', servicoController.listar);
 
+router.get('/:id', servicoController.buscarPorId);
+
+router.put('/:id', servicoController.alterar);
+
 module.exports = router;
