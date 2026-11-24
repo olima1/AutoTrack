@@ -31,6 +31,7 @@ teste/screenshots/
 
 # ===== Backups do Astah =====
 *.bak
+*.lock
 
 # ===== Sistema operacional e editores =====
 .DS_Store
