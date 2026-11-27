@@ -140,3 +140,15 @@ export async function abrirOrdemServico(dados) {
   const resposta = await api.post('/ordens-servico', dados);
   return resposta.data;
 }
+
+/**
+ * Lista as ordens de serviço com filtros opcionais (RF013).
+ * O axios transforma os filtros na query string: ?status=ABERTA&placa=abc&cliente=ana.
+ *
+ * @param {{ status?: string, placa?: string, cliente?: string }} filtros Filtros da tela.
+ * @returns {Promise<object[]>} Ordens com cliente, veículo, status e valor, da mais recente para a mais antiga.
+ */
+export async function listarOrdensServico(filtros) {
+  const resposta = await api.get('/ordens-servico', { params: filtros });
+  return resposta.data;
+}
