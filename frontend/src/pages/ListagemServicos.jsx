@@ -2,20 +2,12 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Modal from '../components/Modal';
 import { excluirServico, lerMensagemDeErro, listarServicos } from '../services/api';
+import { formatarPreco } from '../utils/formatacao';
 
 /**
- * Formata um preço vindo do banco ("150.00") em reais ("R$ 150,00").
- *
- * @param {number|string} preco Preço do serviço.
- * @returns {string} Preço formatado.
- */
-function formatarPreco(preco) {
-  return Number(preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-/**
- * Interface I_ListagemServicos (RF004).
- * Lista os serviços do catálogo, com busca pelo nome, e leva ao cadastro e à alteração.
+ * Interface I_ListagemServicos (RF004 e RF006).
+ * Lista os serviços do catálogo, com busca pelo nome, leva ao cadastro e à alteração,
+ * e exclui serviços com confirmação.
  *
  * @returns {JSX.Element}
  */
@@ -38,12 +30,11 @@ function ListagemServicos() {
   }, [busca]);
 
   /**
- * Interface I_ListagemServicos (RF004 e RF006).
- * Lista os serviços do catálogo, com busca pelo nome, leva ao cadastro e à alteração,
- * e exclui serviços com confirmação.
- *
- * @returns {JSX.Element}
- */
+   * Exclui o serviço confirmado na janela I_ConfirmacaoExclusaoServico (RF006)
+   * e mostra IS_ServicoExcluido ou IE_ServicoEmUso.
+   *
+   * @returns {Promise<void>}
+   */
   async function confirmarExclusao() {
     const servico = servicoParaExcluir;
     setServicosParaExcluir(null);
@@ -55,6 +46,7 @@ function ListagemServicos() {
       setJanela({ tipo: 'erro', titulo: 'Não foi possível excluir', mensagem: lerMensagemDeErro(erro) });
     }
   }
+
   return (
     <>
       <div className="pagina-cabecalho">
