@@ -22,4 +22,22 @@ const PERFIL = Object.freeze({
   CLIENTE: 'CLIENTE',
 });
 
-module.exports = { TAMANHO_MAXIMO_NOME_SERVICO, TAMANHO_MAXIMO_DESCRICAO_SERVICO, CUSTO_BCRYPT, PERFIL, TEMPO_SESSAO_MINUTOS };
+/** Tamanho máximo da observações da ordem de serviço, igual ao VARCHAR(255) da tabela OrdemServico. */
+const TAMANHO_MAXIMO_OBSERVACOES_ORDEM = 255;
+
+/** Status da ordem de serviço, com valores iguais ao da tabela OrdemServico. */
+const STATUS_ORDEM = Object.freeze({
+  ABERTA: 'ABERTA',
+  EM_ANDAMENTO: 'EM_ANDAMENTO',
+  AGUARDANDO_PECAS: 'AGUARDANDO_PECAS',
+  CONCLUIDA: 'CONCLUIDA',
+});
+
+module.exports = {
+  TAMANHO_MAXIMO_NOME_SERVICO,
+  TAMANHO_MAXIMO_DESCRICAO_SERVICO,
+  CUSTO_BCRYPT,
+  PERFIL, TEMPO_SESSAO_MINUTOS,
+  TAMANHO_MAXIMO_OBSERVACOES_ORDEM,
+  STATUS_ORDEM
+};
