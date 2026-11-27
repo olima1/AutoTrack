@@ -4,6 +4,8 @@ import RotaProtegida from './components/RotaProtegida.jsx';
 import Login from './pages/Login.jsx';
 import ListagemServicos from './pages/ListagemServicos.jsx';
 import FormularioServico from './pages/FormularioServico.jsx';
+import FormularioOrdemServico from './pages/FormularioOrdemServico.jsx';
+import ListagemOrdensServico from './pages/ListagemOrdensServico.jsx';
 
 /**
  * Rotas do frontend. /login é pública; as demais exigem sessão (RotaProtegida)
@@ -20,6 +22,8 @@ function App() {
           <Route path="/servicos" element={<ListagemServicos />} />
           <Route path="/servicos/novo" element={<FormularioServico />} />
           <Route path="/servicos/:id/editar" element={<FormularioServico />} />
+          <Route path="/ordens-servico" element={<ListagemOrdensServico />} />
+          <Route path="/ordens-servico/nova" element={<FormularioOrdemServico />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />

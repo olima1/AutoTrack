@@ -107,3 +107,36 @@ export async function excluirServico(id) {
 export function lerMensagemDeErro(erro) {
   return erro.response?.data?.erro ?? 'Não foi possível falar com a API. Verifique se ela está no ar.';
 }
+
+/**
+ * Lista os clientes para o formulário da ordem de serviço (RF012, passo 4).
+ *
+ * @returns {Promise<{ id: number, nome: string, cpf: string }[]>} Clientes em ordem alfabética.
+ */
+export async function listarClientes() {
+  const resposta = await api.get('/clientes');
+  return resposta.data;
+}
+
+/**
+ * Lista os veículos de um cliente (RF012, passo 6).
+ * Lista vazia indica cliente sem veículo (fluxo alternativo 1).
+ *
+ * @param {number|string} clienteId Id do cliente selecionado.
+ * @returns {Promise<{ id: number, placa: string, marca: string, modelo: string }[]>} Veículos do cliente.
+ */
+export async function listarVeiculosDoCliente(clienteId) {
+  const resposta = await api.get(`/clientes/${clienteId}/veiculos`);
+  return resposta.data;
+}
+
+/**
+ * Abre uma ordem de serviço (RF012).
+ *
+ * @param {{ clienteId: number, veiculoId: number, servicosIds: number[], observacoes?: string }} dados Dados do formulário.
+ * @returns {Promise<{ id: number, mensagem: string }>} Id da ordem criada e mensagem de sucesso.
+ */
+export async function abrirOrdemServico(dados) {
+  const resposta = await api.post('/ordens-servico', dados);
+  return resposta.data;
+}
