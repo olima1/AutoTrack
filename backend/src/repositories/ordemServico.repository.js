@@ -50,4 +50,35 @@ async function inserir(ordem, itens) {
   }
 }
 
-module.exports = { inserir, existeOrdemNaoConcluida };
+async function buscarComFiltros(filtros) {
+  const condicoes = [];
+  const valores = [];
+
+  if (filtros.status) {
+    condicoes.push('o.status = ?');
+    valores.push(filtros.status);
+  }
+  if (filtros.placa) {
+    condicoes.push('v.placa LIKE ?');
+    valores.push('%' + filtros.placa + '%');
+  }
+  if (filtros.cliente) {
+    condicoes.push('c.nome LIKE ?');
+    valores.push('%' + filtros.cliente + '%');
+  }
+
+  const where = condicoes.length > 0 ? `WHERE ${condicoes.join(' AND ')}` : '';
+  const [linhas] = await pool.query(
+    `SELECT o.id, o.data_abertura AS dataAbertura, o.status, o.valor_total AS valorTotal,
+       c.nome AS clienteNome, v.placa, v.modelo
+      FROM OrdemServico o
+      JOIN Cliente c ON c.id = o.cliente_id
+      JOIN Veiculo v ON v.id = o.veiculo_id
+      ${where}
+      ORDER BY o.data_abertura DESC, o.id DESC`,
+    valores
+  );
+  return linhas;
+}
+
+module.exports = { inserir, existeOrdemNaoConcluida, buscarComFiltros };

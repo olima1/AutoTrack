@@ -19,4 +19,13 @@ async function abrir(req, res, next) {
   }
 }
 
-module.exports = { abrir };
+async function listar(req, res, next) {
+  try {
+    const ordens = await ordemServicoService.listar(req.query);
+    res.status(200).json(ordens);
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+module.exports = { abrir, listar };
