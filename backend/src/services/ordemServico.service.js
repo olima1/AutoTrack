@@ -7,7 +7,7 @@ const ordemServicoRepository = require('../repositories/ordemServico.repository'
 const veiculoRepository = require('../repositories/veiculo.repository');
 const servicoRepository = require('../repositories/servico.repository');
 const { ErroValidacao, ErroNegocio } = require('../erros');
-const { TAMANHO_MAXIMO_OBSERVACOES_ORDEM } = require('../constantes');
+const { TAMANHO_MAXIMO_OBSERVACOES_ORDEM, STATUS_ORDEM } = require('../constantes');
 
 /**
  * Verifica se o cliente e o veículo foram escolhidos (RF012, passo 12).
@@ -147,4 +147,16 @@ async function abrir(dados) {
   return ordemServicoRepository.inserir(ordem, itens);
 }
 
-module.exports = { abrir, validarDados, calcularValorTotal };
+async function listar(filtros = {}) {
+  const status = (filtros.status ?? '').trim();
+  const placa = (filtros.placa ?? '').trim();
+  const cliente = (filtros.cliente ?? '').trim();
+
+  if (status && !Object.values(STATUS_ORDEM).includes(status)) {
+    throw new ErroValidacao('Status inválido.');
+  }
+
+  return ordemServicoRepository.buscarComFiltros({ status, placa, cliente });
+}
+
+module.exports = { abrir, validarDados, calcularValorTotal, listar };

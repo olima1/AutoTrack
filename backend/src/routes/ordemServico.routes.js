@@ -9,4 +9,6 @@ router.use(verificarToken, permitirPerfis(PERFIL.ADMINISTRADOR));
 
 router.post('/', ordemServicoController.abrir);
 
+router.get('/', ordemServicoController.listar);
+
 module.exports = router;
