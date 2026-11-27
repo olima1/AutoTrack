@@ -101,4 +101,19 @@ async function excluir(id) {
   await pool.query('DELETE FROM Servico WHERE id = ?', [id]);
 }
 
-module.exports = { buscarPorNome, inserir, buscarPorTrechoDoNome, buscarPorId, atualizar, estaEmUso, excluir };
+/**
+ * Busca o preço atual dos serviços escolhidos, para copiá-lo para a ordem de serviço (RF012, regra 5).
+ * O mysql2 transforma a lista em IN (1, 2, 3). Ids que não existem não aparecem no resultado.
+ *
+ * @param {number[]} ids Ids dos serviços selecionados.
+ * @returns {Promise<{ id: number, preco: string }[]>} Serviços encontrados com o preço vigente.
+ */
+async function buscarPorIds(ids) {
+  const [linhas] = await pool.query(
+    'SELECT id, preco FROM Servico WHERE id IN (?)',
+    [ids]
+  );
+  return linhas;
+}
+
+module.exports = { buscarPorNome, inserir, buscarPorTrechoDoNome, buscarPorId, atualizar, estaEmUso, excluir, buscarPorIds };

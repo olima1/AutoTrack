@@ -33,7 +33,7 @@ function validarTamanhos(dados) {
     throw new ErroValidacao('O nome deve ter no máximo ${TAMANHO_MAXIMO_NOME_SERVICO} caracteres.');
   }
   if (dados.descricao && dados.descricao.trim().length > TAMANHO_MAXIMO_DESCRICAO_SERVICO) {
-    throw new ErroValidacao('A descrição deve ter no máximo ${TAMANHO_MAXIMO_DESCRICAO_SERVICO} caracteres.');
+    throw new ErroValidacao(`A descrição deve ter no máximo ${TAMANHO_MAXIMO_DESCRICAO_SERVICO} caracteres.`);
   }
 }
 
