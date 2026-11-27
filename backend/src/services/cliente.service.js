@@ -13,7 +13,7 @@ const veiculoRepository = require('../repositories/veiculo.repository');
  * @returns {Promise<object[]>} Clientes em ordem alfabética.
  */
 async function listar() {
-  return clienteRepository.listar();;
+  return clienteRepository.listar();
 }
 
 /**
