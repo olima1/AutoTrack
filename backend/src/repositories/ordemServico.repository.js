@@ -144,4 +144,35 @@ async function atualizar(id, ordem, { itensNovos, servicosIds }) {
   }
 }
 
-module.exports = { inserir, existeOrdemNaoConcluida, buscarComFiltros, atualizar, buscarPorId, buscarServicosDaOrdem};
+/**
+ * Exclui a ordem de serviço e os serviços vinculados a ela em uma única transação (RF015, passo 6).
+ * Os serviços da ordem (ServicoDaOrdem) são apagados primeiro, porque a chave estrangeira
+ * impede apagar uma ordem que ainda tem serviços. Se algo falhar, o rollback desfaz tudo.
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @returns {Promise<void>}
+ */
+async function excluir(id) {
+  const conexao = await pool.getConnection();
+  try {
+    await conexao.beginTransaction();
+    await conexao.query('DELETE FROM ServicoDaOrdem WHERE ordem_servico_id = ?', [id]);
+    await conexao.query('DELETE FROM OrdemServico WHERE id = ?', [id]);
+    await conexao.commit();
+  } catch (erro) {
+    await conexao.rollback();
+    throw erro;
+  } finally {
+    conexao.release();
+  }
+}
+
+module.exports = {
+  inserir,
+  existeOrdemNaoConcluida,
+  buscarComFiltros,
+  atualizar,
+  buscarPorId,
+  buscarServicosDaOrdem,
+  excluir,
+};

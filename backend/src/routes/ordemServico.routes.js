@@ -20,4 +20,6 @@ router.get('/:id', ordemServicoController.buscarPorId);
 
 router.put('/:id', ordemServicoController.alterar);
 
+router.delete('/:id', ordemServicoController.excluir);
+
 module.exports = router;

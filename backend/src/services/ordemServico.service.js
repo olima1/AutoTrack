@@ -148,6 +148,14 @@ async function abrir(dados) {
   return ordemServicoRepository.inserir(ordem, itens);
 }
 
+/**
+ * Lista as ordens de serviço com filtros opcionais (RF013).
+ * Limpa os textos e confere se o status pedido existe antes de consultar o banco.
+ *
+ * @param {{ status?: string, placa?: string, cliente?: string }} [filtros] Filtros vindos da URL (req.query).
+ * @returns {Promise<object[]>} Ordens encontradas, da mais recente para a mais antiga.
+ * @throws {ErroValidacao} Quando o status não for um dos 4 status da ordem de serviço.
+ */
 async function listar(filtros = {}) {
   const status = (filtros.status ?? '').trim();
   const placa = (filtros.placa ?? '').trim();
@@ -266,4 +274,43 @@ async function buscarPorId(id) {
   return { ...ordem, servicos };
 }
 
-module.exports = { abrir, validarDados, calcularValorTotal, listar, alterar, buscarPorId };
+/**
+ * Permite excluir só a ordem que ainda não foi iniciada (RF015, regra 1 e fluxo alternativo 2).
+ *
+ * @param {{ status: string }} ordem Ordem como está no banco.
+ * @throws {ErroNegocio} Quando o status for diferente de "Aberta".
+ */
+function podeSerExcluida(ordem) {
+  if (ordem.status !== STATUS_ORDEM.ABERTA) {
+    throw new ErroNegocio('Somente ordens de serviço com status Aberta podem ser excluídas.');
+  }
+}
+
+/**
+ * Exclui uma ordem de serviço aberta por engano, junto com os seus serviços (RF015).
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @returns {Promise<void>}
+ * @throws {ErroNaoEncontrado} Quando a ordem não existir.
+ * @throws {ErroNegocio} Quando a ordem já tiver sido iniciada (status diferente de "Aberta").
+ */
+async function excluir(id) {
+  const ordem = await ordemServicoRepository.buscarPorId(id);
+  if (!ordem) {
+    throw new ErroNaoEncontrado('Ordem de serviço não encontrada.');
+  }
+  podeSerExcluida(ordem);
+  await ordemServicoRepository.excluir(id);
+}
+
+module.exports = {
+  abrir,
+  listar,
+  buscarPorId,
+  alterar,
+  excluir,
+  validarDados,
+  calcularValorTotal,
+  validarTransicaoStatus,
+  podeSerExcluida,
+};
