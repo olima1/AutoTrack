@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Modal from '../components/Modal.jsx';
 import {
   abrirOrdemServico,
+  alterarOrdemServico,
+  buscarOrdemServico,
   lerMensagemDeErro,
   listarClientes,
   listarServicos,
   listarVeiculosDoCliente,
 } from '../services/api.js';
-import { formatarPreco } from '../utils/formatacao.js';
+import { formatarPreco, formatarStatus, TRANSICOES_STATUS } from '../utils/formatacao.js';
 
 /**
- * Soma os preços dos serviços selecionados, em centavos, para mostrar o total na tela (RF012, passo 10).
- * É só para o usuário ver: o valor gravado é calculado de novo pelo backend (regra 6).
+ * Soma os preços dos serviços selecionados, em centavos, para mostrar o total na tela (RF012 e RF014).
+ * É só para o usuário ver: o valor gravado é calculado de novo pelo backend.
  *
- * @param {{ preco: string|number }[]} servicos Serviços selecionados.
+ * @param {{ preco: string|number }[]} servicos Serviços selecionados com o preço a somar.
  * @returns {number} Valor total em reais.
  */
 function calcularValorTotal(servicos) {
@@ -26,13 +28,17 @@ function calcularValorTotal(servicos) {
 }
 
 /**
- * Tela I_FormularioOrdemServico (RF012).
- * O Administrador escolhe o cliente, um veículo dele e os serviços; o total é somado na hora
- * e a ordem é enviada para a API, que aplica as regras de negócio.
+ * Tela I_FormularioOrdemServico (RF012 e RF014).
+ * Na abertura, o Administrador escolhe o cliente, um veículo dele e os serviços.
+ * Na edição (/ordens-servico/:id/editar), o formulário abre preenchido, com cliente e veículo
+ * travados (regra 4), e permite mudar o status, os serviços e as observações.
+ * O total é somado na hora; quem aplica as regras de negócio é a API.
  *
  * @returns {JSX.Element}
  */
 function FormularioOrdemServico() {
+  const { id } = useParams();
+  const ehEdicao = Boolean(id);
   const navigate = useNavigate();
 
   // Listas que vêm da API
@@ -42,10 +48,12 @@ function FormularioOrdemServico() {
   const [erroCarregamento, setErroCarregamento] = useState('');
 
   // O que o usuário escolheu no formulário
-  const [dados, setDados] = useState({ clienteId: '', veiculoId: '', servicosIds: [], observacoes: '' });
+  const [dados, setDados] = useState({ clienteId: '', veiculoId: '', servicosIds: [], observacoes: '', status: '' });
+  // Na edição: a ordem como está no banco (status de origem e preços cobrados)
+  const [ordemOriginal, setOrdemOriginal] = useState(null);
   const [janela, setJanela] = useState(null);
 
-  // Ao abrir a tela: busca clientes e serviços (passos 4 e 8)
+  // Ao abrir a tela: busca clientes e serviços
   useEffect(() => {
     Promise.all([listarClientes(), listarServicos()])
       .then(([listaClientes, listaServicos]) => {
@@ -55,7 +63,7 @@ function FormularioOrdemServico() {
       .catch((erro) => setErroCarregamento(lerMensagemDeErro(erro)));
   }, []);
 
-  // Quando o cliente muda: busca os veículos dele (passo 6)
+  // Quando o cliente muda: busca os veículos dele
   useEffect(() => {
     if (!dados.clienteId) {
       setVeiculos([]);
@@ -65,6 +73,23 @@ function FormularioOrdemServico() {
       .then(setVeiculos)
       .catch((erro) => setErroCarregamento(lerMensagemDeErro(erro)));
   }, [dados.clienteId]);
+
+  // Na edição: carrega a ordem e preenche o formulário (RF014, passo 2)
+  useEffect(() => {
+    if (!ehEdicao) return;
+    buscarOrdemServico(id)
+      .then((ordem) => {
+        setOrdemOriginal(ordem);
+        setDados({
+          clienteId: String(ordem.clienteId),
+          veiculoId: String(ordem.veiculoId),
+          servicosIds: ordem.servicos.map((item) => item.servicoId),
+          observacoes: ordem.observacoes ?? '',
+          status: ordem.status,
+        });
+      })
+      .catch((erro) => setErroCarregamento(lerMensagemDeErro(erro)));
+  }, [id, ehEdicao]);
 
   /**
    * Troca o cliente e limpa o veículo escolhido (ele era do cliente anterior).
@@ -85,6 +110,15 @@ function FormularioOrdemServico() {
   }
 
   /**
+   * Troca o status escolhido (RF014, regras 1 e 2).
+   *
+   * @param {import('react').ChangeEvent<HTMLSelectElement>} evento Mudança no select de status.
+   */
+  function alterarStatus(evento) {
+    setDados({ ...dados, status: evento.target.value });
+  }
+
+  /**
    * Marca o serviço se ele não estiver na lista, ou desmarca se já estiver (passo 9).
    *
    * @param {number} servicoId Id do serviço clicado.
@@ -92,7 +126,7 @@ function FormularioOrdemServico() {
   function alternarServico(servicoId) {
     const jaMarcado = dados.servicosIds.includes(servicoId);
     const servicosIds = jaMarcado
-      ? dados.servicosIds.filter((id) => id !== servicoId)
+      ? dados.servicosIds.filter((idMarcado) => idMarcado !== servicoId)
       : [...dados.servicosIds, servicoId];
     setDados({ ...dados, servicosIds });
   }
@@ -107,7 +141,19 @@ function FormularioOrdemServico() {
   }
 
   /**
-   * Envia a ordem para a API e mostra IS_OrdemServicoAberta ou a mensagem de erro (passos 11 a 15).
+   * Preço exibido para o serviço (RF014, regra 5): o cobrado na abertura, se ele já estava
+   * na ordem, ou o preço atual do catálogo, se ele é novo (ou se é uma ordem nova).
+   *
+   * @param {{ id: number, preco: string }} servico Serviço do catálogo.
+   * @returns {string|number} Preço a exibir e somar.
+   */
+  function precoDoServico(servico) {
+    const itemDaOrdem = ordemOriginal?.servicos.find((item) => item.servicoId === servico.id);
+    return itemDaOrdem ? itemDaOrdem.precoCobrado : servico.preco;
+  }
+
+  /**
+   * Envia a ordem para a API: abre (RF012) ou altera (RF014) e mostra o modal de sucesso ou de erro.
    *
    * @param {import('react').FormEvent<HTMLFormElement>} evento Envio do formulário.
    * @returns {Promise<void>}
@@ -115,29 +161,46 @@ function FormularioOrdemServico() {
   async function salvar(evento) {
     evento.preventDefault();
     try {
-      const resposta = await abrirOrdemServico(dados);
-      setJanela({ tipo: 'sucesso', titulo: 'Ordem de serviço aberta', mensagem: resposta.mensagem });
+      // Na edição só vão os campos que podem mudar; cliente e veículo ficam fixos (regra 4).
+      const resposta = ehEdicao
+        ? await alterarOrdemServico(id, {
+          status: dados.status,
+          servicosIds: dados.servicosIds,
+          observacoes: dados.observacoes,
+        })
+        : await abrirOrdemServico(dados);
+      const titulo = ehEdicao ? 'Ordem de serviço alterada' : 'Ordem de serviço aberta';
+      setJanela({ tipo: 'sucesso', titulo, mensagem: resposta.mensagem });
     } catch (erro) {
-      setJanela({ tipo: 'erro', titulo: 'Não foi possível abrir a ordem', mensagem: lerMensagemDeErro(erro) });
+      setJanela({ tipo: 'erro', titulo: 'Não foi possível salvar', mensagem: lerMensagemDeErro(erro) });
     }
   }
 
-  /** Fecha o modal; depois do sucesso, volta para a listagem de ordens (passo 16). */
+  /** Fecha o modal; depois do sucesso, volta para a listagem de ordens. */
   function fecharJanela() {
     if (janela.tipo === 'sucesso') navigate('/ordens-servico');
     setJanela(null);
   }
 
-  const clienteSemVeiculo = dados.clienteId !== '' && veiculos.length === 0;
+  const clienteSemVeiculo = !ehEdicao && dados.clienteId !== '' && veiculos.length === 0;
   const servicosSelecionados = servicos.filter((servico) => dados.servicosIds.includes(servico.id));
-  const valorTotal = calcularValorTotal(servicosSelecionados);
+  const valorTotal = calcularValorTotal(servicosSelecionados.map((servico) => ({ preco: precoDoServico(servico) })));
+
+  // Status atual + os destinos permitidos a partir dele (RF014, regras 1 e 2)
+  const opcoesStatus = ordemOriginal
+    ? [ordemOriginal.status, ...TRANSICOES_STATUS[ordemOriginal.status]]
+    : [];
 
   return (
     <>
       <div className="pagina-cabecalho">
         <div>
-          <h1>Nova ordem de serviço</h1>
-          <p className="subtitulo">Selecione o cliente, o veículo e os serviços. O valor total é calculado automaticamente.</p>
+          <h1>{ehEdicao ? `Editar ordem de serviço #${id}` : 'Nova ordem de serviço'}</h1>
+          <p className="subtitulo">
+            {ehEdicao
+              ? 'Altere o status, os serviços ou as observações. Cliente e veículo não podem ser alterados.'
+              : 'Selecione o cliente, o veículo e os serviços. O valor total é calculado automaticamente.'}
+          </p>
         </div>
       </div>
 
@@ -148,7 +211,8 @@ function FormularioOrdemServico() {
           <div className="ordem-linha">
             <label className="rotulo" htmlFor="cliente">
               Cliente *
-              <select id="cliente" className="campo" value={dados.clienteId} onChange={alterarCliente}>
+              <select id="cliente" className="campo" value={dados.clienteId} onChange={alterarCliente}
+                disabled={ehEdicao}>
                 <option value="">Selecione o cliente</option>
                 {clientes.map((cliente) => (
                   <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>
@@ -159,7 +223,7 @@ function FormularioOrdemServico() {
             <label className="rotulo" htmlFor="veiculo">
               Veículo *
               <select id="veiculo" className="campo" value={dados.veiculoId} onChange={alterarVeiculo}
-                disabled={dados.clienteId === ''}>
+                disabled={ehEdicao || dados.clienteId === ''}>
                 <option value="">Selecione o veículo</option>
                 {veiculos.map((veiculo) => (
                   <option key={veiculo.id} value={veiculo.id}>{veiculo.modelo} · {veiculo.placa}</option>
@@ -170,6 +234,17 @@ function FormularioOrdemServico() {
 
           {clienteSemVeiculo && <p className="alerta-erro">Cliente sem veículo cadastrado.</p>}
 
+          {ehEdicao && (
+            <label className="rotulo rotulo-curto" htmlFor="status">
+              Status *
+              <select id="status" className="campo" value={dados.status} onChange={alterarStatus}>
+                {opcoesStatus.map((status) => (
+                  <option key={status} value={status}>{formatarStatus(status)}</option>
+                ))}
+              </select>
+            </label>
+          )}
+
           <div className="rotulo">
             Serviços *
             <div className="lista-servicos">
@@ -179,7 +254,7 @@ function FormularioOrdemServico() {
                   <label key={servico.id} className={marcado ? 'item-servico item-servico-marcado' : 'item-servico'}>
                     <input type="checkbox" checked={marcado} onChange={() => alternarServico(servico.id)} />
                     <span className="item-servico-nome">{servico.nome}</span>
-                    <span>{formatarPreco(servico.preco)}</span>
+                    <span>{formatarPreco(precoDoServico(servico))}</span>
                   </label>
                 );
               })}
@@ -197,19 +272,21 @@ function FormularioOrdemServico() {
           <h2>Resumo</h2>
           <p className="resumo-linha">
             <span>Status</span>
-            <strong>Aberta</strong>
+            <strong>{ehEdicao ? formatarStatus(dados.status) : 'Aberta'}</strong>
           </p>
           {servicosSelecionados.map((servico) => (
             <p key={servico.id} className="resumo-linha">
               <span>{servico.nome}</span>
-              <span>{formatarPreco(servico.preco)}</span>
+              <span>{formatarPreco(precoDoServico(servico))}</span>
             </p>
           ))}
           <p className="resumo-linha resumo-total">
             <span>Valor total</span>
             <strong>{formatarPreco(valorTotal)}</strong>
           </p>
-          <button type="submit" className="botao botao-primario">Abrir ordem de serviço</button>
+          <button type="submit" className="botao botao-primario">
+            {ehEdicao ? 'Salvar' : 'Abrir ordem de serviço'}
+          </button>
           <Link to="/ordens-servico" className="botao botao-secundario">Cancelar</Link>
         </aside>
       </form>

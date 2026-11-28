@@ -16,7 +16,7 @@ function ListagemOrdensServico() {
   const [erro, setErro] = useState('');
 
   /**
-   * Busca as ordens na API com os filtros atuais (passos 2 e 4).
+   * Busca as ordens na API com os filtros atuais.
    *
    * @returns {Promise<void>}
    */
@@ -29,7 +29,7 @@ function ListagemOrdensServico() {
     }
   }
 
-  // Ao abrir a tela: todas as ordens, sem filtro (passo 2).
+  // Ao abrir a tela: todas as ordens, sem filtro.
   useEffect(() => {
     buscar();
   }, []);
@@ -45,7 +45,7 @@ function ListagemOrdensServico() {
   }
 
   /**
-   * Aplica os filtros ao clicar em "Filtrar" ou apertar Enter (passo 3).
+   * Aplica os filtros ao clicar em "Filtrar" ou apertar Enter.
    *
    * @param {import('react').FormEvent<HTMLFormElement>} evento Envio do formulário de filtros.
    */
@@ -102,6 +102,7 @@ function ListagemOrdensServico() {
                 <th>Abertura</th>
                 <th>Status</th>
                 <th>Valor</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -115,6 +116,13 @@ function ListagemOrdensServico() {
                     <span className={`status status-${ordem.status}`}>{formatarStatus(ordem.status)}</span>
                   </td>
                   <td>{formatarPreco(ordem.valorTotal)}</td>
+                  <td>
+                    {ordem.status === 'CONCLUIDA' ? (
+                      <button type="button" className="botao botao-secundario botao-pequeno" disabled>Editar</button>
+                    ) : (
+                      <Link to={`/ordens-servico/${ordem.id}/editar`} className="botao botao-secundario botao-pequeno">Editar</Link>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

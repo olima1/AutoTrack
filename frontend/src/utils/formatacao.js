@@ -42,3 +42,14 @@ export const TEXTO_DO_STATUS = Object.freeze({
 export function formatarStatus(status) {
   return TEXTO_DO_STATUS[status] ?? status;
 }
+
+/**
+ * Mudanças de status permitidas (RF014, regras 1 e 2), iguais às do backend (constantes.js).
+ * Aqui servem só para mostrar as opções certas; quem valida de verdade é a API.
+ */
+export const TRANSICOES_STATUS = Object.freeze({
+  ABERTA: ['EM_ANDAMENTO'],
+  EM_ANDAMENTO: ['AGUARDANDO_PECAS', 'CONCLUIDA'],
+  AGUARDANDO_PECAS: ['EM_ANDAMENTO'],
+  CONCLUIDA: [],
+});
