@@ -50,6 +50,13 @@ async function inserir(ordem, itens) {
   }
 }
 
+/**
+ * Lista as ordens de serviço com cliente e veículo, aplicando só os filtros preenchidos (RF013).
+ * Os valores digitados vão sempre nos ? (sem risco de SQL injection).
+ *
+ * @param {{ status?: string, placa?: string, cliente?: string }} filtros Filtros opcionais e combináveis.
+ * @returns {Promise<object[]>} Ordens com clienteNome, placa e modelo, da mais recente para a mais antiga.
+ */
 async function buscarComFiltros(filtros) {
   const condicoes = [];
   const valores = [];
@@ -69,16 +76,72 @@ async function buscarComFiltros(filtros) {
 
   const where = condicoes.length > 0 ? `WHERE ${condicoes.join(' AND ')}` : '';
   const [linhas] = await pool.query(
-    `SELECT o.id, o.data_abertura AS dataAbertura, o.status, o.valor_total AS valorTotal,
-       c.nome AS clienteNome, v.placa, v.modelo
-      FROM OrdemServico o
-      JOIN Cliente c ON c.id = o.cliente_id
-      JOIN Veiculo v ON v.id = o.veiculo_id
-      ${where}
-      ORDER BY o.data_abertura DESC, o.id DESC`,
-    valores
+    `SELECT o.id, o.data_abertura AS dataAbertura, o.status, o.valor_total AS valorTotal, c.nome AS clienteNome, v.placa, v.modelo
+    FROM OrdemServico o JOIN Cliente c ON c.id = o.cliente_id JOIN Veiculo v ON v.id = o.veiculo_id
+    ${where} ORDER BY o.data_abertura DESC, o.id DESC`, valores
   );
   return linhas;
 }
 
-module.exports = { inserir, existeOrdemNaoConcluida, buscarComFiltros };
+/**
+ * Busca uma ordem de serviço com o cliente e o veículo, para a tela de edição (RF014, passo 2).
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @returns {Promise<object|null>} A ordem (com clienteId, veiculoId, clienteNome, placa e modelo) ou null se não existir.
+ */
+async function buscarPorId(id) {
+  const [linhas] = await pool.query(`SELECT o.id, o.data_abertura AS dataAbertura, o.status, o.valor_total AS valorTotal,
+    c.nome AS clienteNome, v.placa, v.modelo, o.observacoes, o.cliente_id AS clienteId, o.veiculo_id AS veiculoId
+    FROM OrdemServico o JOIN Cliente c ON c.id = o.cliente_id JOIN Veiculo v ON v.id = o.veiculo_id WHERE o.id = ?`,
+    [id]
+  );
+  return linhas[0] ?? null;
+}
+
+/**
+ * Lista os serviços já gravados na ordem, com o preço cobrado na abertura (RF014, regra 5).
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @returns {Promise<{ servicoId: number, precoCobrado: string }[]>} Serviços da ordem.
+ */
+async function buscarServicosDaOrdem(id) {
+  const [linhas] = await pool.query(
+    'SELECT servico_id AS servicoId, preco_cobrado AS precoCobrado FROM ServicoDaOrdem WHERE ordem_servico_id = ?',
+    [id]
+  );
+  return linhas;
+}
+
+/**
+ * Atualiza a ordem de serviço em uma única transação (RF014):
+ * status, observações, valor total e data de conclusão; remove os serviços desmarcados
+ * e insere os serviços novos. Se qualquer comando falhar, o rollback desfaz tudo.
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @param {{ status: string, observacoes: string|null, valorTotal: number }} ordem Dados novos da ordem.
+ * @param {object} servicos Serviços da ordem depois da alteração.
+ * @param {{ servicoId: number, precoCobrado: number }[]} servicos.itensNovos Só os serviços adicionados agora, com o preço vigente (regra 5).
+ * @param {number[]} servicos.servicosIds Ids de todos os serviços que ficaram marcados (os outros são removidos).
+ * @returns {Promise<void>}
+ */
+async function atualizar(id, ordem, { itensNovos, servicosIds }) {
+  const dataConclusao = ordem.status === STATUS_ORDEM.CONCLUIDA ? new Date() : null;
+  const conexao = await pool.getConnection();
+  try {
+    await conexao.beginTransaction();
+    await conexao.query('UPDATE OrdemServico SET status = ?, observacoes = ?, valor_total = ?, data_conclusao = ? WHERE id = ?', [ordem.status, ordem.observacoes, ordem.valorTotal, dataConclusao, id]);
+    await conexao.query('DELETE FROM ServicoDaOrdem WHERE ordem_servico_id = ? AND servico_id NOT IN (?)', [id, servicosIds]);
+    if (itensNovos.length > 0) {
+      const linhas = itensNovos.map((item) => [id, item.servicoId, item.precoCobrado]);
+      await conexao.query('INSERT INTO ServicoDaOrdem (ordem_servico_id, servico_id, preco_cobrado) VALUES ?', [linhas]);
+    }
+    await conexao.commit();
+  } catch (erro) {
+    await conexao.rollback();
+    throw erro;
+  } finally {
+    conexao.release();
+  }
+}
+
+module.exports = { inserir, existeOrdemNaoConcluida, buscarComFiltros, atualizar, buscarPorId, buscarServicosDaOrdem};
