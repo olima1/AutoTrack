@@ -133,4 +133,51 @@ async function atualizar(id, cliente) {
   }
 }
 
-module.exports = { listar, buscarPorCpf, inserir, buscarPorId, atualizar };
+/**
+ * Conta os veículos e as ordens de serviço do cliente (RF018, regras 1 e 2).
+ *
+ * @param {number|string} id Id do cliente.
+ * @returns {Promise<{ veiculos: number, ordens: number }>} Quantidades de vínculos.
+ */
+async function contarVinculos(id) {
+  const [linhas] = await pool.query(
+    `SELECT
+       (SELECT COUNT(*) FROM Veiculo WHERE cliente_id = ?) AS veiculos,
+       (SELECT COUNT(*) FROM OrdemServico WHERE cliente_id = ?) AS ordens`,
+    [id, id]
+  );
+  return { veiculos: Number(linhas[0].veiculos), ordens: Number(linhas[0].ordens) };
+}
+
+/**
+ * Exclui o cliente e o acesso dele ao sistema em uma única transação (RF018, passo 6 e regra 3).
+ * O acesso (Usuario) é apagado primeiro, porque a chave estrangeira impede apagar
+ * um cliente que ainda tem usuário. Se algo falhar, o rollback desfaz tudo.
+ *
+ * @param {number|string} id Id do cliente.
+ * @returns {Promise<void>}
+ */
+async function excluir(id) {
+  const conexao = await pool.getConnection();
+  try {
+    await conexao.beginTransaction();
+    await conexao.query('DELETE FROM Usuario WHERE cliente_id = ?', [id]);
+    await conexao.query('DELETE FROM Cliente WHERE id = ?', [id]);
+    await conexao.commit();
+  } catch (erro) {
+    await conexao.rollback();
+    throw erro;
+  } finally {
+    conexao.release();
+  }
+}
+
+module.exports = {
+  listar,
+  buscarPorCpf,
+  inserir,
+  buscarPorId,
+  atualizar,
+  contarVinculos,
+  excluir,
+};

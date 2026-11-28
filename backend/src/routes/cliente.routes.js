@@ -20,6 +20,8 @@ router.get('/:id', clienteController.buscarPorId);
 
 router.put('/:id', clienteController.alterar);
 
+router.delete('/:id', clienteController.excluir);
+
 router.get('/:id/veiculos', clienteController.listarVeiculos);
 
 module.exports = router;
