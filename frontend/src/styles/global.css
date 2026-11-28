@@ -572,3 +572,166 @@ textarea.campo {
   justify-content: space-between;
   gap: 12px;
 }
+
+/* ---------- Área do Cliente (RF016) ---------- */
+.cliente-layout {
+  min-height: 100vh;
+}
+
+.cliente-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 40px;
+  background: var(--branco);
+  border-bottom: 1px solid var(--grafite-100);
+}
+
+.cliente-logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--grafite-900);
+}
+
+.cliente-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cliente-menu-item {
+  color: var(--grafite-500);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.cliente-menu-item.active {
+  color: var(--primaria-700);
+}
+
+.cliente-nome {
+  color: var(--grafite-500);
+}
+
+.cliente-conteudo {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 16px;
+}
+
+.painel-cartao {
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+}
+
+.painel-cartao h2,
+.historico-cabecalho h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.painel-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.painel-resumo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.painel-resumo div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--grafite-50);
+  border-radius: 8px;
+}
+
+.painel-resumo small,
+.observacoes small {
+  color: var(--grafite-500);
+}
+
+.painel-cartao > .botao {
+  align-self: flex-start;
+}
+
+.linha-tempo {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+.etapa {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--grafite-500);
+}
+
+.etapa-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--grafite-300);
+  font-size: 13px;
+}
+
+.etapa-feita {
+  color: var(--grafite-900);
+}
+
+.etapa-feita .etapa-numero {
+  background: var(--primaria-600);
+  border-color: var(--primaria-600);
+  color: var(--branco);
+}
+
+.observacoes {
+  padding: 12px 16px;
+  background: var(--grafite-50);
+  border-radius: 8px;
+}
+
+.observacoes p {
+  margin: 4px 0 0;
+}
+
+.cliente-abas {
+  margin-bottom: 16px;
+}
+
+.tabela-clicavel tbody tr {
+  cursor: pointer;
+}
+
+.tabela-clicavel tbody tr:hover,
+.linha-selecionada {
+  background: var(--primaria-100);
+}
+
+@media (max-width: 640px) {
+  .cliente-topo {
+    flex-direction: column;
+    padding: 12px 16px;
+  }
+
+  .painel-resumo {
+    grid-template-columns: 1fr;
+  }
+}
