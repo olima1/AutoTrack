@@ -564,3 +564,11 @@ textarea.campo {
   color: var(--grafite-500);
   cursor: not-allowed;
 }
+
+/* Alerta com um botão ao lado (ex.: "Cadastrar veículo" no RF012) */
+.alerta-com-acao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}

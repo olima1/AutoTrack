@@ -233,3 +233,14 @@ export async function excluirCliente(id) {
   const resposta = await api.delete(`/clientes/${id}`);
   return resposta.data;
 }
+
+/**
+ * Cadastra um veículo vinculado a um cliente (RF010).
+ *
+ * @param {{ clienteId: number|string, placa: string, marca: string, modelo: string, ano: number|string, quilometragem?: number|string }} dados Dados do formulário.
+ * @returns {Promise<{ id: number, mensagem: string }>} Id do veículo criado e mensagem de sucesso.
+ */
+export async function cadastrarVeiculo(dados) {
+  const resposta = await api.post('/veiculos', dados);
+  return resposta.data;
+}

@@ -232,7 +232,15 @@ function FormularioOrdemServico() {
             </label>
           </div>
 
-          {clienteSemVeiculo && <p className="alerta-erro">Cliente sem veículo cadastrado.</p>}
+          {/* RF012, fluxo alternativo 1: leva ao cadastro de veículo (RF010) já com o cliente escolhido */}
+          {clienteSemVeiculo && (
+            <div className="alerta-erro alerta-com-acao">
+              <span>Cliente sem veículo cadastrado.</span>
+              <Link to={`/veiculos/novo?clienteId=${dados.clienteId}`} className="botao botao-secundario botao-pequeno">
+                Cadastrar veículo
+              </Link>
+            </div>
+          )}
 
           {ehEdicao && (
             <label className="rotulo rotulo-curto" htmlFor="status">

@@ -8,6 +8,8 @@ import FormularioOrdemServico from './pages/FormularioOrdemServico.jsx';
 import ListagemOrdensServico from './pages/ListagemOrdensServico.jsx';
 import ListagemClientes from './pages/ListagemClientes.jsx';
 import FormularioCliente from './pages/FormularioCliente.jsx';
+import ListagemVeiculos from './pages/ListagemVeiculos.jsx';
+import FormularioVeiculo from './pages/FormularioVeiculo.jsx';
 
 /**
  * Rotas do frontend. /login é pública; as demais exigem sessão (RotaProtegida)
@@ -30,6 +32,8 @@ function App() {
           <Route path="/clientes" element={<ListagemClientes />} />
           <Route path="/clientes/novo" element={<FormularioCliente />} />
           <Route path="/clientes/:id/editar" element={<FormularioCliente />} />
+          <Route path="/veiculos" element={<ListagemVeiculos />} />
+          <Route path="/veiculos/novo" element={<FormularioVeiculo />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
