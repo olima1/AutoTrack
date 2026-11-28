@@ -557,3 +557,10 @@ textarea.campo {
   max-width: none;
   margin-bottom: 0;
 }
+
+/* Campo desabilitado (ex.: CPF na alteração do cliente) */
+.campo:disabled {
+  background: var(--grafite-50);
+  color: var(--grafite-500);
+  cursor: not-allowed;
+}

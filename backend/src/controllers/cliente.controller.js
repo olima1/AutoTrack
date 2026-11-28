@@ -59,4 +59,40 @@ async function cadastrar(req, res, next) {
   }
 }
 
-module.exports = { listar, listarVeiculos, cadastrar };
+/**
+ * Busca um cliente com o e-mail de acesso, para a tela de alteração (RF009, passo 2).
+ * Responde 200 com o cliente ou 404 se ele não existir.
+ *
+ * @param {import('express').Request} req Requisição com o id do cliente em req.params.id.
+ * @param {import('express').Response} res Resposta HTTP.
+ * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
+ * @returns {Promise<void>}
+ */
+async function buscarPorId(req, res, next) {
+  try {
+    const cliente = await clienteService.buscarPorId(req.params.id);
+    res.status(200).json(cliente);
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+/**
+ * Altera o nome, o telefone e o e-mail de acesso de um cliente (RF009).
+ * Responde 200 com a mensagem da IS_ClienteAlterado.
+ *
+ * @param {import('express').Request} req Requisição com o id em req.params.id e nome, telefone e email no corpo.
+ * @param {import('express').Response} res Resposta HTTP.
+ * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
+ * @returns {Promise<void>}
+ */
+async function alterar(req, res, next) {
+  try {
+    await clienteService.alterar(req.params.id, req.body);
+    res.status(200).json({ mensagem: 'Cliente alterado com sucesso!' });
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+module.exports = { listar, listarVeiculos, cadastrar, buscarPorId, alterar };
