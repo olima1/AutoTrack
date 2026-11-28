@@ -5,14 +5,47 @@
 
 const pool = require('../config/database');
 const { PERFIL } = require('../constantes');
+const { somenteDigitos } = require('../utils/validacoes');
 
 /**
- * Lista os clientes em ordem alfabética, para o formulário da ordem de serviço (RF012, passo 4).
+ * Monta o WHERE da busca de clientes: nome contendo o texto ou CPF contendo os dígitos digitados.
+ * O CPF só entra se o texto tiver algum dígito; sem isso, "cpf LIKE '%%'" encontraria todos.
  *
- * @returns {Promise<{ id: number, nome: string, cpf: string }[]>} Clientes cadastrados (lista vazia se nenhum).
+ * @param {string} texto Texto da busca, já sem espaços nas pontas.
+ * @returns {{ where: string, valores: string[] }} Trecho do SQL e os valores dos ?.
  */
-async function listar() {
-  const [linhas] = await pool.query('SELECT id, nome, cpf FROM Cliente ORDER BY nome');
+function montarBusca(texto) {
+  if (!texto) {
+    return { where: '', valores: [] };
+  }
+  const condicoes = ['c.nome LIKE ?'];
+  const valores = [`%${texto}%`];
+  const digitos = somenteDigitos(texto);
+  if (digitos) {
+    condicoes.push('c.cpf LIKE ?');
+    valores.push(`%${digitos}%`);
+  }
+  return { where: `WHERE ${condicoes.join(' OR ')}`, valores };
+}
+
+/**
+ * Lista os clientes em ordem alfabética com telefone e e-mail de acesso, filtrando pelo nome
+ * ou pelo CPF (RF008). Sem texto, devolve todos (usado também no formulário da ordem de serviço).
+ * O LEFT JOIN mantém na lista os clientes que ainda não têm acesso (email vem null).
+ *
+ * @param {string} [texto] Parte do nome ou do CPF.
+ * @returns {Promise<{ id: number, nome: string, cpf: string, telefone: string, email: string|null }[]>} Clientes encontrados.
+ */
+async function listar(texto = '') {
+  const { where, valores } = montarBusca(texto);
+  const [linhas] = await pool.query(
+    `SELECT c.id, c.nome, c.cpf, c.telefone, u.email
+     FROM Cliente c
+     LEFT JOIN Usuario u ON u.cliente_id = c.id
+     ${where}
+     ORDER BY c.nome`,
+    valores
+  );
   return linhas;
 }
 

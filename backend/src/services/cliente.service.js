@@ -21,12 +21,14 @@ const {
 const CAMPOS_OBRIGATORIOS = ['nome', 'cpf', 'telefone', 'email', 'senha'];
 
 /**
- * Lista os clientes cadastrados (RF012, passo 4).
+ * Lista os clientes em ordem alfabética, com busca opcional por nome ou CPF (RF008).
+ * Também alimenta a lista de clientes do formulário da ordem de serviço (RF012, passo 4).
  *
- * @returns {Promise<object[]>} Clientes em ordem alfabética.
+ * @param {string} [busca] Texto digitado no campo "Buscar".
+ * @returns {Promise<object[]>} Clientes com nome, CPF, telefone e e-mail (lista vazia se nenhum).
  */
-async function listar() {
-  return clienteRepository.listar();
+async function listar(busca) {
+  return clienteRepository.listar((busca ?? '').trim());
 }
 
 /**

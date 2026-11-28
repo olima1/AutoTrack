@@ -544,3 +544,16 @@ textarea.campo {
   background: var(--sucesso-100);
   color: var(--sucesso-700);
 }
+
+/* ---------- Busca com botão (RF008) ---------- */
+.busca {
+  display: flex;
+  gap: 8px;
+  max-width: 480px;
+  margin-bottom: 16px;
+}
+
+.busca .campo-busca {
+  max-width: none;
+  margin-bottom: 0;
+}

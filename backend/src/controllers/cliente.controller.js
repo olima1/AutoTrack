@@ -6,17 +6,17 @@
 const clienteService = require('../services/cliente.service');
 
 /**
- * Lista os clientes para o formulário da ordem de serviço (RF012).
- * Responde 200 com a lista.
+ * Lista os clientes, com busca opcional por nome ou CPF (RF008).
+ * Responde 200 com a lista (vazia se nenhum cliente for encontrado).
  *
- * @param {import('express').Request} _req Requisição HTTP (não usada).
+ * @param {import('express').Request} req Requisição com o texto da busca em req.query.busca.
  * @param {import('express').Response} res Resposta HTTP.
  * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
  * @returns {Promise<void>}
  */
-async function listar(_req, res, next) {
+async function listar(req, res, next) {
   try {
-    const clientes = await clienteService.listar();
+    const clientes = await clienteService.listar(req.query.busca);
     res.status(200).json(clientes);
   } catch (erro) {
     next(erro);
