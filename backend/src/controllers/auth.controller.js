@@ -21,4 +21,22 @@ async function login(req, res, next) {
   }
 }
 
-module.exports = { login };
+/**
+ * Troca a senha inicial do Cliente no primeiro acesso (RF017).
+ * Responde 200 com o novo token e a mensagem da IS_SenhaAlterada.
+ *
+ * @param {import('express').Request} req Requisição autenticada com novaSenha e confirmacao no corpo.
+ * @param {import('express').Response} res Resposta HTTP.
+ * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
+ * @returns {Promise<void>}
+ */
+async function alterarSenhaInicial(req, res, next) {
+  try {
+    const resultado = await authService.alterarSenhaInicial(req.usuario.id, req.body);
+    res.status(200).json(resultado);
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+module.exports = { login, alterarSenhaInicial };

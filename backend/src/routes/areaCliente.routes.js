@@ -6,12 +6,13 @@
 
 const express = require('express');
 const areaClienteController = require('../controllers/areaCliente.controller');
-const { verificarToken, permitirPerfis } = require('../middlewares/autenticacao');
+const { verificarToken, permitirPerfis, exigirSenhaAlterada } = require('../middlewares/autenticacao');
 const { PERFIL } = require('../constantes');
 
 const router = express.Router();
 
-router.use(verificarToken, permitirPerfis(PERFIL.CLIENTE));
+// O Cliente só entra na área dele depois de trocar a senha inicial (RF017, regra 1).
+router.use(verificarToken, permitirPerfis(PERFIL.CLIENTE), exigirSenhaAlterada);
 
 router.get('/', areaClienteController.buscarPainel);
 

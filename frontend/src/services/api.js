@@ -266,3 +266,14 @@ export async function buscarPainelCliente() {
   const resposta = await api.get('/area-cliente');
   return resposta.data;
 }
+
+/**
+ * Troca a senha inicial do Cliente no primeiro acesso (RF017).
+ *
+ * @param {{ novaSenha: string, confirmacao: string }} dados Nova senha e confirmação.
+ * @returns {Promise<{ token: string, mensagem: string }>} Novo token da sessão e a mensagem de sucesso.
+ */
+export async function alterarSenhaInicial(dados) {
+  const resposta = await api.put('/auth/senha-inicial', dados);
+  return resposta.data;
+}
