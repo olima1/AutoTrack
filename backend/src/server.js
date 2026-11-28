@@ -10,6 +10,7 @@ const cors = require('cors');
 const servicoRoutes = require('./routes/servico.routes');
 const ordemServicoRoutes = require('./routes/ordemServico.routes');
 const clienteRoutes = require('./routes/cliente.routes');
+const veiculoRoutes = require('./routes/veiculo.routes');
 const authRoutes = require('./routes/auth.routes');
 const tratarErros = require('./middlewares/tratarErros');
 
@@ -35,6 +36,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/ordens-servico', ordemServicoRoutes);
 
 app.use('/api/clientes', clienteRoutes);
+
+app.use('/api/veiculos', veiculoRoutes);
 
 // O middleware de erros precisa ser o último app.use.
 app.use(tratarErros);

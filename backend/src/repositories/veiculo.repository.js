@@ -33,4 +33,29 @@ async function listarPorCliente(clienteId) {
   return linhas;
 }
 
-module.exports = { buscarPorId, listarPorCliente };
+/**
+ * Busca um veículo pela placa, para impedir placa duplicada (RF010, regra 1).
+ *
+ * @param {string} placa Placa em maiúsculas.
+ * @returns {Promise<{ id: number }|null>} O veículo encontrado ou null se não existir.
+ */
+async function buscarPorPlaca(placa) {
+  const [linhas] = await pool.query('SELECT id FROM Veiculo WHERE placa = ?', [placa]);
+  return linhas[0] ?? null;
+}
+
+/**
+ * Grava um novo veículo vinculado ao cliente (RF010, passo 9).
+ *
+ * @param {{ placa: string, marca: string, modelo: string, ano: number, quilometragem: number, clienteId: number }} veiculo Dados do veículo.
+ * @returns {Promise<number>} Id do veículo criado.
+ */
+async function inserir(veiculo) {
+  const [resultado] = await pool.query(
+    'INSERT INTO Veiculo (placa, marca, modelo, ano, quilometragem, cliente_id) VALUES (?, ?, ?, ?, ?, ?)',
+    [veiculo.placa, veiculo.marca, veiculo.modelo, veiculo.ano, veiculo.quilometragem, veiculo.clienteId]
+  );
+  return resultado.insertId;
+}
+
+module.exports = { buscarPorId, listarPorCliente, buscarPorPlaca, inserir };

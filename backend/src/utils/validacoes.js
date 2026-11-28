@@ -44,6 +44,19 @@ function emailValido(email) {
   return FORMATO_EMAIL.test(email);
 }
 
+/** Placa no padrão Mercosul (AAA0A00) ou no antigo (AAA-0000), em maiúsculas (RF010, regra 1). */
+const FORMATO_PLACA = /^[A-Z]{3}(\d[A-Z]\d{2}|-\d{4})$/;
+
+/**
+ * Verifica o formato da placa (RF010, regra 1).
+ *
+ * @param {string} placa Placa em maiúsculas, sem espaços.
+ * @returns {boolean} true se seguir AAA0A00 ou AAA-0000.
+ */
+function placaValida(placa) {
+  return FORMATO_PLACA.test(placa);
+}
+
 /**
  * Remove tudo que não for número: "123.456.789-09" vira "12345678909".
  *
@@ -54,4 +67,4 @@ function somenteDigitos(texto) {
   return String(texto ?? '').replace(/\D/g, '');
 }
 
-module.exports = { cpfValido, emailValido, somenteDigitos };
+module.exports = { cpfValido, emailValido, placaValida, somenteDigitos };

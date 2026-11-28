@@ -53,6 +53,15 @@ const TAMANHO_MAXIMO_EMAIL = 100;
 /** Quantidades de dígitos aceitas no telefone: fixo (10) ou celular (11) com DDD (RF007, regra 3). */
 const DIGITOS_TELEFONE = Object.freeze([10, 11]);
 
+/** Ano mínimo do veículo, igual ao CHECK da tabela Veiculo (RF010, regra 2). */
+const ANO_MINIMO_VEICULO = 1950;
+
+/** Tamanho máximo da marca do veículo, igual ao VARCHAR(40) da tabela Veiculo. */
+const TAMANHO_MAXIMO_MARCA = 40;
+
+/** Tamanho máximo do modelo do veículo, igual ao VARCHAR(60) da tabela Veiculo. */
+const TAMANHO_MAXIMO_MODELO = 60;
+
 module.exports = {
   TAMANHO_MAXIMO_NOME_SERVICO,
   TAMANHO_MAXIMO_DESCRICAO_SERVICO,
@@ -66,4 +75,7 @@ module.exports = {
   TAMANHO_MAXIMO_NOME_CLIENTE,
   TAMANHO_MAXIMO_EMAIL,
   DIGITOS_TELEFONE,
+  ANO_MINIMO_VEICULO,
+  TAMANHO_MAXIMO_MARCA,
+  TAMANHO_MAXIMO_MODELO,
 };
