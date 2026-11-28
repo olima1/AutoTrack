@@ -41,4 +41,22 @@ async function listarVeiculos(req, res, next) {
   }
 }
 
-module.exports = { listar, listarVeiculos };
+/**
+ * Cadastra um cliente e o acesso dele (RF007).
+ * Responde 201 com o id e a mensagem da IS_ClienteCadastrado.
+ *
+ * @param {import('express').Request} req Requisição com nome, cpf, telefone, email e senha no corpo.
+ * @param {import('express').Response} res Resposta HTTP.
+ * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
+ * @returns {Promise<void>}
+ */
+async function cadastrar(req, res, next) {
+  try {
+    const id = await clienteService.cadastrar(req.body);
+    res.status(201).json({ id, mensagem: 'Cliente cadastrado com sucesso!' });
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+module.exports = { listar, listarVeiculos, cadastrar };

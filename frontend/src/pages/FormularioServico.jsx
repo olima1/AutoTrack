@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import Modal from "../components/Modal";
-import { alterarServico, buscarServico, cadastrarServico } from "../services/api";
-import { lerMensagemDeErro } from "../services/api";
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import Modal from '../components/Modal.jsx';
+import { alterarServico, buscarServico, cadastrarServico, lerMensagemDeErro } from '../services/api.js';
 
 /** Mensagem da interface IE_CamposObrigatorios. */
-const MENSAGEM_CAMPOS_OBRIGATORIOS = 'Preencha todos os campos obrigatórios.'
+const MENSAGEM_CAMPOS_OBRIGATORIOS = 'Preencha todos os campos obrigatórios.';
 
 /** Campos que precisam estar preenchidos antes de enviar. */
 const CAMPOS_OBRIGATORIOS = ['nome', 'preco'];
@@ -37,11 +36,22 @@ function FormularioServico() {
     }));
   }, [id, ehEdicao]);
 
+  /**
+   * Atualiza o campo que mudou, usando o name do input.
+   *
+   * @param {import('react').ChangeEvent<HTMLInputElement|HTMLTextAreaElement>} evento Mudança em um campo.
+   */
   function alterarCampo(evento) {
     const { name, value } = evento.target;
     setDados({ ...dados, [name]: value });
   }
 
+  /**
+   * Destaca os campos vazios ou envia o serviço para a API: cadastra (RF003) ou altera (RF005).
+   *
+   * @param {import('react').FormEvent<HTMLFormElement>} evento Envio do formulário.
+   * @returns {Promise<void>}
+   */
   async function salvar(evento) {
     evento.preventDefault();
     const vazios = CAMPOS_OBRIGATORIOS.filter((campo) => !String(dados[campo]).trim());
@@ -57,14 +67,22 @@ function FormularioServico() {
     }
   }
 
+  /** Fecha o modal; quando indicado, volta para a listagem de serviços. */
   function fecharJanela() {
     if (janela.voltarParaLista) navigate('/servicos');
     setJanela(null);
   }
 
+  /**
+   * Classe do input: destacada em vermelho se o campo ficou vazio no último envio.
+   *
+   * @param {string} campo Nome do campo.
+   * @returns {string} Classes CSS do input.
+   */
   function classeDoCampo(campo) {
     return camposVazios.includes(campo) ? 'campo campo-erro' : 'campo';
   }
+
   return (
     <>
       <div className="pagina-cabecalho">
@@ -93,7 +111,7 @@ function FormularioServico() {
         </label>
 
         <div className="formulario-botoes">
-          <Link to="/servico" className="botao botao-secundario">Cancelar</Link>
+          <Link to="/servicos" className="botao botao-secundario">Cancelar</Link>
           <button type="submit" className="botao botao-primario">Salvar</button>
         </div>
       </form>
@@ -105,4 +123,4 @@ function FormularioServico() {
   );
 }
 
-export default FormularioServico
+export default FormularioServico;

@@ -13,6 +13,26 @@ export function formatarPreco(preco) {
 }
 
 /**
+ * Formata um CPF só com números ("12345678909") como "123.456.789-09".
+ *
+ * @param {string} cpf CPF com 11 dígitos.
+ * @returns {string} CPF formatado (ou o valor original, se não tiver 11 dígitos).
+ */
+export function formatarCpf(cpf) {
+  return String(cpf).replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+}
+
+/**
+ * Formata um telefone só com números como "(35) 99812-4410" (celular) ou "(35) 3333-4444" (fixo).
+ *
+ * @param {string} telefone Telefone com 10 ou 11 dígitos.
+ * @returns {string} Telefone formatado (ou o valor original, se não tiver 10 ou 11 dígitos).
+ */
+export function formatarTelefone(telefone) {
+  return String(telefone).replace(/^(\d{2})(\d{4,5})(\d{4})$/, '($1) $2-$3');
+}
+
+/**
  * Formata a data de abertura vinda da API ("2026-11-27T02:10:00.000Z") como "27/11/2026".
  *
  * @param {string|Date} data Data vinda do banco.

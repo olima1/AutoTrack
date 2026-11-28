@@ -41,6 +41,18 @@ const TRANSICOES_STATUS = Object.freeze({
   CONCLUIDA: [],
 });
 
+/** Tamanho mínimo da senha do cliente (RF007, regra 4). */
+const TAMANHO_MINIMO_SENHA = 8;
+
+/** Tamanho máximo do nome do cliente, igual ao VARCHAR(100) da tabela Cliente. */
+const TAMANHO_MAXIMO_NOME_CLIENTE = 100;
+
+/** Tamanho máximo do e-mail, igual ao VARCHAR(100) da tabela Usuario. */
+const TAMANHO_MAXIMO_EMAIL = 100;
+
+/** Quantidades de dígitos aceitas no telefone: fixo (10) ou celular (11) com DDD (RF007, regra 3). */
+const DIGITOS_TELEFONE = Object.freeze([10, 11]);
+
 module.exports = {
   TAMANHO_MAXIMO_NOME_SERVICO,
   TAMANHO_MAXIMO_DESCRICAO_SERVICO,
@@ -50,4 +62,8 @@ module.exports = {
   TAMANHO_MAXIMO_OBSERVACOES_ORDEM,
   STATUS_ORDEM,
   TRANSICOES_STATUS,
+  TAMANHO_MINIMO_SENHA,
+  TAMANHO_MAXIMO_NOME_CLIENTE,
+  TAMANHO_MAXIMO_EMAIL,
+  DIGITOS_TELEFONE,
 };
