@@ -25,8 +25,8 @@ function Login() {
     setEnviando(true);
     try {
       const sessao = await fazerLogin(dados);
-      salvarSessao(sessao.token, sessao.perfil);
-      navigate(rotaInicial(sessao.perfil), { replace: true });
+      salvarSessao(sessao.token, sessao.perfil, sessao.primeiroAcesso);
+      navigate(rotaInicial(sessao.perfil, sessao.primeiroAcesso), { replace: true });
     } catch (falha) {
       setErro(lerMensagemDeErro(falha));
     } finally {

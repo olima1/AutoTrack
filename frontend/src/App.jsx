@@ -11,6 +11,7 @@ import FormularioCliente from './pages/FormularioCliente.jsx';
 import ListagemVeiculos from './pages/ListagemVeiculos.jsx';
 import FormularioVeiculo from './pages/FormularioVeiculo.jsx';
 import LayoutCliente from './components/LayoutCliente.jsx';
+import PrimeiroAcesso from './pages/PrimeiroAcesso.jsx';
 import DashboardCliente from './pages/DashboardCliente.jsx';
 import AcompanhamentoOrdemServico from './pages/AcompanhamentoOrdemServico.jsx';
 
@@ -39,6 +40,9 @@ function App() {
           <Route path="/veiculos" element={<ListagemVeiculos />} />
           <Route path="/veiculos/novo" element={<FormularioVeiculo />} />
         </Route>
+      </Route>
+      <Route element={<RotaProtegida perfil="CLIENTE" primeiroAcesso />}>
+        <Route path="/primeiro-acesso" element={<PrimeiroAcesso />} />
       </Route>
       <Route element={<RotaProtegida perfil="CLIENTE" />}>
         <Route element={<LayoutCliente />}>

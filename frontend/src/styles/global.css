@@ -735,3 +735,16 @@ textarea.campo {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Primeiro acesso (RF017) ---------- */
+.primeiro-acesso-titulo {
+  margin: 8px 0 0;
+  font-size: 20px;
+  text-align: center;
+}
+
+.dica-senha {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--grafite-500);
+}
