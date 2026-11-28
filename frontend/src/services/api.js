@@ -222,3 +222,14 @@ export async function alterarCliente(id, dados) {
   const resposta = await api.put(`/clientes/${id}`, dados);
   return resposta.data;
 }
+
+/**
+ * Exclui um cliente sem veículo nem ordem de serviço, junto com o acesso dele (RF018).
+ *
+ * @param {number|string} id Id do cliente.
+ * @returns {Promise<{ mensagem: string }>} Mensagem de sucesso.
+ */
+export async function excluirCliente(id) {
+  const resposta = await api.delete(`/clientes/${id}`);
+  return resposta.data;
+}

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { lerMensagemDeErro, listarClientes } from '../services/api.js';
+import Modal from '../components/Modal.jsx';
+import { excluirCliente, lerMensagemDeErro, listarClientes } from '../services/api.js';
 import { formatarCpf, formatarTelefone } from '../utils/formatacao.js';
 
 /**
- * Tela I_ListagemClientes (RF007, RF008 e RF009).
+ * Tela I_ListagemClientes (RF007, RF008, RF009 e RF018).
  * Lista os clientes em ordem alfabética com nome, CPF, telefone e e-mail (RF008, regra 2),
  * filtra por parte do nome ou do CPF ao clicar em "Pesquisar" e leva ao cadastro (RF007)
- * e à alteração (RF009).
+ * e à alteração (RF009) e exclui clientes com confirmação (RF018).
  *
  * @returns {JSX.Element}
  */
@@ -15,6 +16,8 @@ function ListagemClientes() {
   const [clientes, setClientes] = useState([]);
   const [busca, setBusca] = useState('');
   const [erro, setErro] = useState('');
+  const [clienteParaExcluir, setClienteParaExcluir] = useState(null);
+  const [janela, setJanela] = useState(null);
 
   /**
    * Busca os clientes na API com o texto atual do campo "Buscar" (passos 2 e 4).
@@ -34,6 +37,24 @@ function ListagemClientes() {
   useEffect(() => {
     buscar();
   }, []);
+
+  /**
+   * Exclui o cliente confirmado na janela I_ConfirmacaoExclusaoCliente (RF018)
+   * e mostra IS_ClienteExcluido ou IE_ClienteComVinculo.
+   *
+   * @returns {Promise<void>}
+   */
+  async function confirmarExclusao() {
+    const cliente = clienteParaExcluir;
+    setClienteParaExcluir(null);
+    try {
+      const resposta = await excluirCliente(cliente.id);
+      setClientes(clientes.filter((item) => item.id !== cliente.id));
+      setJanela({ tipo: 'sucesso', titulo: 'Cliente excluído', mensagem: resposta.mensagem });
+    } catch (falha) {
+      setJanela({ tipo: 'erro', titulo: 'Não foi possível excluir', mensagem: lerMensagemDeErro(falha) });
+    }
+  }
 
   /**
    * Aplica a busca ao clicar em "Pesquisar" ou apertar Enter (passo 3).
@@ -89,6 +110,10 @@ function ListagemClientes() {
                       <Link to={`/clientes/${cliente.id}/editar`} className="botao botao-secundario botao-pequeno">
                         Editar
                       </Link>
+                      <button type="button" className="botao botao-perigo botao-pequeno"
+                        onClick={() => setClienteParaExcluir(cliente)}>
+                        Excluir
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -97,6 +122,25 @@ function ListagemClientes() {
           </table>
         )}
       </div>
+
+      {clienteParaExcluir && (
+        <Modal
+          tipo="perigo"
+          titulo="Excluir cliente?"
+          mensagem={`O cliente ${clienteParaExcluir.nome} (CPF ${formatarCpf(clienteParaExcluir.cpf)}) e o acesso dele ao sistema serão excluídos. Esta ação não pode ser desfeita.`}
+        >
+          <button type="button" className="botao botao-secundario" onClick={() => setClienteParaExcluir(null)}>
+            Cancelar
+          </button>
+          <button type="button" className="botao botao-perigo-cheio" onClick={confirmarExclusao}>
+            Confirmar exclusão
+          </button>
+        </Modal>
+      )}
+
+      {janela && (
+        <Modal tipo={janela.tipo} titulo={janela.titulo} mensagem={janela.mensagem} onFechar={() => setJanela(null)} />
+      )}
     </>
   );
 }

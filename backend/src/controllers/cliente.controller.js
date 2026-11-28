@@ -95,4 +95,22 @@ async function alterar(req, res, next) {
   }
 }
 
-module.exports = { listar, listarVeiculos, cadastrar, buscarPorId, alterar };
+/**
+ * Exclui um cliente e o acesso dele (RF018).
+ * Responde 200 com a mensagem da IS_ClienteExcluido.
+ *
+ * @param {import('express').Request} req Requisição com o id do cliente em req.params.id.
+ * @param {import('express').Response} res Resposta HTTP.
+ * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
+ * @returns {Promise<void>}
+ */
+async function excluir(req, res, next) {
+  try {
+    await clienteService.excluir(req.params.id);
+    res.status(200).json({ mensagem: 'Cliente excluído com sucesso!' });
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+module.exports = { listar, listarVeiculos, cadastrar, buscarPorId, alterar, excluir };

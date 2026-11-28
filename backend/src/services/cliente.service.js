@@ -210,4 +210,38 @@ async function alterar(id, dados = {}) {
   await clienteRepository.atualizar(id, cliente);
 }
 
-module.exports = { listar, listarVeiculos, cadastrar, buscarPorId, alterar };
+/**
+ * Impede excluir cliente com veículo ou ordem de serviço (RF018, regras 1 e 2 e fluxo alternativo 2).
+ *
+ * @param {number|string} id Id do cliente.
+ * @throws {ErroNegocio} Quando o cliente tiver pelo menos um veículo ou uma ordem de serviço.
+ */
+async function validarSemVinculos(id) {
+  const { veiculos, ordens } = await clienteRepository.contarVinculos(id);
+  if (veiculos > 0 || ordens > 0) {
+    throw new ErroNegocio('Cliente com veículo ou ordem de serviço não pode ser excluído.');
+  }
+}
+
+/**
+ * Exclui um cliente e o acesso dele ao sistema (RF018).
+ *
+ * @param {number|string} id Id do cliente.
+ * @returns {Promise<void>}
+ * @throws {ErroNaoEncontrado} Quando o cliente não existir.
+ * @throws {ErroNegocio} Quando o cliente tiver veículo ou ordem de serviço.
+ */
+async function excluir(id) {
+  await buscarPorId(id);
+  await validarSemVinculos(id);
+  await clienteRepository.excluir(id);
+}
+
+module.exports = {
+  listar,
+  listarVeiculos,
+  cadastrar,
+  buscarPorId,
+  alterar,
+  excluir,
+};
