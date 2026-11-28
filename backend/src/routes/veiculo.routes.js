@@ -14,4 +14,6 @@ router.use(verificarToken, permitirPerfis(PERFIL.ADMINISTRADOR));
 
 router.post('/', veiculoController.cadastrar);
 
+router.get('/', veiculoController.listar);
+
 module.exports = router;

@@ -101,4 +101,14 @@ async function cadastrar(dados = {}) {
   return veiculoRepository.inserir(veiculo);
 }
 
-module.exports = { cadastrar };
+/**
+ * Lista os veículos com o nome do cliente, com busca opcional por placa ou cliente (RF011).
+ *
+ * @param {string} [busca] Texto digitado no campo "Buscar".
+ * @returns {Promise<object[]>} Veículos em ordem alfabética de placa (lista vazia se nenhum).
+ */
+async function listar(busca) {
+  return veiculoRepository.listar((busca ?? '').trim());
+}
+
+module.exports = { cadastrar, listar };

@@ -1,6 +1,7 @@
 /**
  * Acesso à tabela Veiculo no MySQL (BP05).
- * Só executa SQL e devolve os dados; as regras de negócio ficam no ordemServico.service.js.
+ * Só executa SQL e devolve os dados; as regras de negócio ficam nos services
+ * (veiculo.service.js e ordemServico.service.js).
  */
 
 const pool = require('../config/database');
@@ -58,4 +59,27 @@ async function inserir(veiculo) {
   return resultado.insertId;
 }
 
-module.exports = { buscarPorId, listarPorCliente, buscarPorPlaca, inserir };
+/**
+ * Lista os veículos com o nome do cliente, em ordem alfabética de placa (RF011).
+ * Com texto, filtra pelos veículos cuja placa ou cujo cliente contém o texto
+ * (sem diferenciar maiúsculas de minúsculas, regra 1). Na placa, o hífen é ignorado:
+ * "abc1234" encontra "ABC-1234".
+ *
+ * @param {string} [texto] Parte da placa ou do nome do cliente.
+ * @returns {Promise<object[]>} Veículos com placa, marca, modelo, ano, quilometragem e clienteNome (regra 2).
+ */
+async function listar(texto = '') {
+  const where = texto ? "WHERE REPLACE(v.placa, '-', '') LIKE ? OR c.nome LIKE ?" : '';
+  const termoPlaca = `%${texto.replace(/[\s-]/g, '')}%`;
+  const [linhas] = await pool.query(
+    `SELECT v.id, v.placa, v.marca, v.modelo, v.ano, v.quilometragem, c.nome AS clienteNome
+     FROM Veiculo v
+     JOIN Cliente c ON c.id = v.cliente_id
+     ${where}
+     ORDER BY v.placa`,
+    texto ? [termoPlaca, `%${texto}%`] : []
+  );
+  return linhas;
+}
+
+module.exports = { buscarPorId, listarPorCliente, buscarPorPlaca, inserir, listar };
