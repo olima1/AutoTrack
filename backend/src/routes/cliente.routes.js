@@ -3,14 +3,16 @@
  * Liga cada URL de /api/clientes à função do controller. Todas exigem login de Administrador (RNF007).
  */
 
-const { verificarToken, permitirPerfis } = require('../middlewares/autenticacao');
-const { PERFIL } = require('../constantes');
 const express = require('express');
 const clienteController = require('../controllers/cliente.controller');
+const { verificarToken, permitirPerfis } = require('../middlewares/autenticacao');
+const { PERFIL } = require('../constantes');
 
 const router = express.Router();
 
 router.use(verificarToken, permitirPerfis(PERFIL.ADMINISTRADOR));
+
+router.post('/', clienteController.cadastrar);
 
 router.get('/', clienteController.listar);
 

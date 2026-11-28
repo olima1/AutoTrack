@@ -6,9 +6,9 @@ VALUES ('admin@autotrack.com', '$2b$10$QtUNYf7tHrq91arxjL5OwepZkP6gYHo5Ym69IO2Sb
 -- Clientes e veículos de exemplo, para abrir ordens de serviço
 -- enquanto os CRUDs de Cliente (RF007) e Veículo (RF010) não existem.
 INSERT INTO Cliente (nome, cpf, telefone) VALUES
-  ('Ana Souza', '11122233344', '35999990001'),
-  ('Bruno Lima', '55566677788', '35999990002'),
-  ('Carla Dias', '99988877766', '35999990003');
+  ('Ana Souza', '11122233396', '35999990001'),
+  ('Bruno Lima', '55566677720', '35999990002'),
+  ('Carla Dias', '99988877714', '35999990003');
 
 INSERT INTO Veiculo (placa, marca, modelo, ano, quilometragem, cliente_id) VALUES
   ('ABC1D23', 'Fiat', 'Argo', 2020, 45000, 1),
