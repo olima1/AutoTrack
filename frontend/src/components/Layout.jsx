@@ -23,6 +23,7 @@ function Layout() {
         <nav className="menu-itens">
           <NavLink to="/ordens-servico" className="menu-item">Ordens de serviço</NavLink>
           <NavLink to="/clientes" className="menu-item">Clientes</NavLink>
+          <NavLink to="/veiculos" className="menu-item">Veículos</NavLink>
           <NavLink to="/servicos" className="menu-item">Serviços</NavLink>
         </nav>
         <div className="menu-rodape">
