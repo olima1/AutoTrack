@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fazerLogin, lerMensagemDeErro } from '../services/api';
-import { salvarSessao } from '../services/sessao';
+import { rotaInicial, salvarSessao } from '../services/sessao';
 
 /**
  * Tela I_Login (RF001).
@@ -26,7 +26,7 @@ function Login() {
     try {
       const sessao = await fazerLogin(dados);
       salvarSessao(sessao.token, sessao.perfil);
-      navigate('/servicos', { replace: true });
+      navigate(rotaInicial(sessao.perfil), { replace: true });
     } catch (falha) {
       setErro(lerMensagemDeErro(falha));
     } finally {

@@ -41,3 +41,19 @@ export function encerrarSessao() {
   localStorage.removeItem(CHAVE_TOKEN);
   localStorage.removeItem(CHAVE_PERFIL);
 }
+
+/** Tela inicial de cada perfil depois do login. */
+const ROTA_INICIAL = Object.freeze({
+  ADMINISTRADOR: '/ordens-servico',
+  CLIENTE: '/cliente',
+});
+
+/**
+ * Tela para onde o usuário vai depois do login, conforme o perfil (RF001).
+ *
+ * @param {string|null} perfil 'ADMINISTRADOR' ou 'CLIENTE'.
+ * @returns {string} Caminho da tela inicial (o login, se o perfil for desconhecido).
+ */
+export function rotaInicial(perfil) {
+  return ROTA_INICIAL[perfil] ?? '/login';
+}

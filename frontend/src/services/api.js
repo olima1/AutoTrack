@@ -255,3 +255,14 @@ export async function listarVeiculos(busca) {
   const resposta = await api.get('/veiculos', { params: { busca } });
   return resposta.data;
 }
+
+/**
+ * Painel do Cliente logado: nome, veículos, ordens em andamento e histórico (RF016).
+ * O cliente é identificado pelo token, não por um id na URL.
+ *
+ * @returns {Promise<{ nome: string, veiculos: object[], emAndamento: object[], historico: object[] }>} Dados da área do cliente.
+ */
+export async function buscarPainelCliente() {
+  const resposta = await api.get('/area-cliente');
+  return resposta.data;
+}

@@ -125,11 +125,15 @@ async function buscarServicosDaOrdem(id) {
  * @returns {Promise<void>}
  */
 async function atualizar(id, ordem, { itensNovos, servicosIds }) {
-  const dataConclusao = ordem.status === STATUS_ORDEM.CONCLUIDA ? new Date() : null;
+  // A data de conclusão usa o relógio do MySQL (NOW()), o mesmo da data de abertura (CURRENT_TIMESTAMP).
+  const concluida = ordem.status === STATUS_ORDEM.CONCLUIDA;
   const conexao = await pool.getConnection();
   try {
     await conexao.beginTransaction();
-    await conexao.query('UPDATE OrdemServico SET status = ?, observacoes = ?, valor_total = ?, data_conclusao = ? WHERE id = ?', [ordem.status, ordem.observacoes, ordem.valorTotal, dataConclusao, id]);
+    await conexao.query(
+      'UPDATE OrdemServico SET status = ?, observacoes = ?, valor_total = ?, data_conclusao = IF(?, NOW(), NULL) WHERE id = ?',
+      [ordem.status, ordem.observacoes, ordem.valorTotal, concluida, id]
+    );
     await conexao.query('DELETE FROM ServicoDaOrdem WHERE ordem_servico_id = ? AND servico_id NOT IN (?)', [id, servicosIds]);
     if (itensNovos.length > 0) {
       const linhas = itensNovos.map((item) => [id, item.servicoId, item.precoCobrado]);
@@ -167,6 +171,47 @@ async function excluir(id) {
   }
 }
 
+/**
+ * Lista as ordens de serviço de um cliente com o veículo, da mais recente para a mais antiga (RF016, passo 2).
+ * Filtra pelo cliente_id: o Cliente só vê as ordens dos próprios veículos (regra 1).
+ *
+ * @param {number} clienteId Id do cliente logado (vem do token, nunca da URL).
+ * @returns {Promise<object[]>} Ordens com datas, status, observações, valor total e veículo.
+ */
+async function buscarPorCliente(clienteId) {
+  const [linhas] = await pool.query(
+    `SELECT o.id, o.data_abertura AS dataAbertura, o.data_conclusao AS dataConclusao, o.status,
+       o.observacoes, o.valor_total AS valorTotal, v.placa, v.marca, v.modelo
+     FROM OrdemServico o
+     JOIN Veiculo v ON v.id = o.veiculo_id
+     WHERE o.cliente_id = ?
+     ORDER BY o.data_abertura DESC, o.id DESC`,
+    [clienteId]
+  );
+  return linhas;
+}
+
+/**
+ * Lista os serviços de várias ordens de uma vez, com o nome e o preço cobrado (RF016, passo 6).
+ *
+ * @param {number[]} ordensIds Ids das ordens de serviço.
+ * @returns {Promise<{ ordemId: number, nome: string, precoCobrado: string }[]>} Serviços das ordens.
+ */
+async function buscarServicosDasOrdens(ordensIds) {
+  if (ordensIds.length === 0) {
+    return [];
+  }
+  const [linhas] = await pool.query(
+    `SELECT sdo.ordem_servico_id AS ordemId, s.nome, sdo.preco_cobrado AS precoCobrado
+     FROM ServicoDaOrdem sdo
+     JOIN Servico s ON s.id = sdo.servico_id
+     WHERE sdo.ordem_servico_id IN (?)
+     ORDER BY s.nome`,
+    [ordensIds]
+  );
+  return linhas;
+}
+
 module.exports = {
   inserir,
   existeOrdemNaoConcluida,
@@ -175,4 +220,6 @@ module.exports = {
   buscarPorId,
   buscarServicosDaOrdem,
   excluir,
+  buscarPorCliente,
+  buscarServicosDasOrdens,
 };

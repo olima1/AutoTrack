@@ -10,10 +10,14 @@ import ListagemClientes from './pages/ListagemClientes.jsx';
 import FormularioCliente from './pages/FormularioCliente.jsx';
 import ListagemVeiculos from './pages/ListagemVeiculos.jsx';
 import FormularioVeiculo from './pages/FormularioVeiculo.jsx';
+import LayoutCliente from './components/LayoutCliente.jsx';
+import DashboardCliente from './pages/DashboardCliente.jsx';
+import AcompanhamentoOrdemServico from './pages/AcompanhamentoOrdemServico.jsx';
 
 /**
- * Rotas do frontend. /login é pública; as demais exigem sessão (RotaProtegida)
- * e usam o Layout com menu lateral. Endereço desconhecido vai para o login.
+ * Rotas do frontend. /login é pública. As telas do Administrador exigem o perfil ADMINISTRADOR
+ * e usam o Layout com menu lateral; as do Cliente (/cliente) exigem o perfil CLIENTE e usam
+ * o LayoutCliente (RNF007). Endereço desconhecido vai para o login.
  *
  * @returns {JSX.Element}
  */
@@ -21,7 +25,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route element={<RotaProtegida />}>
+      <Route element={<RotaProtegida perfil="ADMINISTRADOR" />}>
         <Route element={<Layout />}>
           <Route path="/servicos" element={<ListagemServicos />} />
           <Route path="/servicos/novo" element={<FormularioServico />} />
@@ -34,6 +38,12 @@ function App() {
           <Route path="/clientes/:id/editar" element={<FormularioCliente />} />
           <Route path="/veiculos" element={<ListagemVeiculos />} />
           <Route path="/veiculos/novo" element={<FormularioVeiculo />} />
+        </Route>
+      </Route>
+      <Route element={<RotaProtegida perfil="CLIENTE" />}>
+        <Route element={<LayoutCliente />}>
+          <Route path="/cliente" element={<DashboardCliente />} />
+          <Route path="/cliente/ordens" element={<AcompanhamentoOrdemServico />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
