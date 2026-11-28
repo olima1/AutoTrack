@@ -186,3 +186,14 @@ export async function excluirOrdemServico(id) {
   const resposta = await api.delete(`/ordens-servico/${id}`);
   return resposta.data;
 }
+
+/**
+ * Cadastra um cliente e o acesso dele ao sistema (RF007).
+ *
+ * @param {{ nome: string, cpf: string, telefone: string, email: string, senha: string }} dados Dados do formulário.
+ * @returns {Promise<{ id: number, mensagem: string }>} Id do cliente criado e mensagem de sucesso.
+ */
+export async function cadastrarCliente(dados) {
+  const resposta = await api.post('/clientes', dados);
+  return resposta.data;
+}
