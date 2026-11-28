@@ -77,4 +77,22 @@ async function alterar(req, res, next) {
   }
 }
 
-module.exports = { abrir, listar, alterar, buscarPorId };
+/**
+ * Exclui uma ordem de serviço (RF015).
+ * Responde 200 com a mensagem da IS_OrdemServicoExcluida.
+ *
+ * @param {import('express').Request} req Requisição com o id da ordem em req.params.id.
+ * @param {import('express').Response} res Resposta HTTP.
+ * @param {import('express').NextFunction} next Repassa o erro ao middleware de erros.
+ * @returns {Promise<void>}
+ */
+async function excluir(req, res, next) {
+  try {
+    await ordemServicoService.excluir(req.params.id);
+    res.status(200).json({ mensagem: 'Ordem de serviço excluída com sucesso!' });
+  } catch (erro) {
+    next(erro);
+  }
+}
+
+module.exports = { abrir, listar, alterar, buscarPorId, excluir };

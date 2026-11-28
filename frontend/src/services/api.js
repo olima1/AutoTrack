@@ -175,3 +175,14 @@ export async function alterarOrdemServico(id, dados) {
   const resposta = await api.put(`/ordens-servico/${id}`, dados);
   return resposta.data;
 }
+
+/**
+ * Exclui uma ordem de serviço com status Aberta (RF015).
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @returns {Promise<{ mensagem: string }>} Mensagem de sucesso.
+ */
+export async function excluirOrdemServico(id) {
+  const resposta = await api.delete(`/ordens-servico/${id}`);
+  return resposta.data;
+}
