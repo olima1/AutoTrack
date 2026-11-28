@@ -91,4 +91,46 @@ async function inserir(cliente, acesso) {
   }
 }
 
-module.exports = { listar, buscarPorCpf, inserir };
+/**
+ * Busca um cliente pelo id, com o e-mail de acesso (RF009, passo 2).
+ *
+ * @param {number|string} id Id do cliente.
+ * @returns {Promise<{ id: number, nome: string, cpf: string, telefone: string, email: string|null }|null>} O cliente ou null.
+ */
+async function buscarPorId(id) {
+  const [linhas] = await pool.query(
+    `SELECT c.id, c.nome, c.cpf, c.telefone, u.email
+     FROM Cliente c
+     LEFT JOIN Usuario u ON u.cliente_id = c.id
+     WHERE c.id = ?`,
+    [id]
+  );
+  return linhas[0] ?? null;
+}
+
+/**
+ * Atualiza o cliente e o e-mail de acesso em uma única transação (RF009, passo 6).
+ * O CPF não é alterado (regra 1). Se o cliente não tiver acesso (email null), só a tabela Cliente muda.
+ *
+ * @param {number|string} id Id do cliente.
+ * @param {{ nome: string, telefone: string, email: string|null }} cliente Dados novos.
+ * @returns {Promise<void>}
+ */
+async function atualizar(id, cliente) {
+  const conexao = await pool.getConnection();
+  try {
+    await conexao.beginTransaction();
+    await conexao.query('UPDATE Cliente SET nome = ?, telefone = ? WHERE id = ?', [cliente.nome, cliente.telefone, id]);
+    if (cliente.email !== null) {
+      await conexao.query('UPDATE Usuario SET email = ? WHERE cliente_id = ?', [cliente.email, id]);
+    }
+    await conexao.commit();
+  } catch (erro) {
+    await conexao.rollback();
+    throw erro;
+  } finally {
+    conexao.release();
+  }
+}
+
+module.exports = { listar, buscarPorCpf, inserir, buscarPorId, atualizar };

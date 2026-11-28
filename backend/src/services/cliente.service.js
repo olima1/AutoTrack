@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 const clienteRepository = require('../repositories/cliente.repository');
 const usuarioRepository = require('../repositories/usuario.repository');
 const veiculoRepository = require('../repositories/veiculo.repository');
-const { ErroValidacao, ErroNegocio } = require('../erros');
+const { ErroValidacao, ErroNegocio, ErroNaoEncontrado } = require('../erros');
 const { cpfValido, emailValido, somenteDigitos } = require('../utils/validacoes');
 const {
   CUSTO_BCRYPT,
@@ -17,8 +17,11 @@ const {
   TAMANHO_MINIMO_SENHA,
 } = require('../constantes');
 
-/** Campos que o formulário de cliente precisa preencher (RF007, fluxo alternativo 1). */
+/** Campos que o formulário de cliente precisa preencher no cadastro (RF007, fluxo alternativo 1). */
 const CAMPOS_OBRIGATORIOS = ['nome', 'cpf', 'telefone', 'email', 'senha'];
+
+/** Campos obrigatórios na alteração: o CPF não muda (RF009, regra 1) e a senha não é alterada aqui. */
+const CAMPOS_OBRIGATORIOS_ALTERACAO = ['nome', 'telefone'];
 
 /**
  * Lista os clientes em ordem alfabética, com busca opcional por nome ou CPF (RF008).
@@ -43,13 +46,14 @@ async function listarVeiculos(clienteId) {
 }
 
 /**
- * Verifica se todos os campos obrigatórios foram preenchidos (RF007, fluxo alternativo 1).
+ * Verifica se os campos obrigatórios foram preenchidos (RF007 e RF009, fluxo alternativo 1).
  *
  * @param {object} dados Dados recebidos do formulário.
+ * @param {string[]} [campos] Campos a conferir (por padrão, os do cadastro).
  * @throws {ErroValidacao} Quando algum campo estiver vazio.
  */
-function validarObrigatorios(dados) {
-  const faltando = CAMPOS_OBRIGATORIOS.some((campo) => !String(dados[campo] ?? '').trim());
+function validarObrigatorios(dados, campos = CAMPOS_OBRIGATORIOS) {
+  const faltando = campos.some((campo) => !String(dados[campo] ?? '').trim());
   if (faltando) {
     throw new ErroValidacao('Preencha todos os campos obrigatórios.');
   }
@@ -72,23 +76,35 @@ function prepararCliente(dados) {
 }
 
 /**
- * Valida os formatos das regras 1 a 4 do RF007 e os tamanhos das colunas.
+ * Valida nome, telefone e e-mail, regras comuns ao cadastro e à alteração
+ * (RF007, regras 2 e 3; RF009, regra 3) e os tamanhos das colunas.
+ *
+ * @param {{ nome: string, telefone: string, email?: string|null }} cliente Dados preparados.
+ * @throws {ErroValidacao} Na primeira regra que não for atendida.
+ */
+function validarContato(cliente) {
+  if (cliente.nome.length > TAMANHO_MAXIMO_NOME_CLIENTE) {
+    throw new ErroValidacao(`O nome deve ter no máximo ${TAMANHO_MAXIMO_NOME_CLIENTE} caracteres.`);
+  }
+  if (!DIGITOS_TELEFONE.includes(cliente.telefone.length)) {
+    throw new ErroValidacao('O telefone deve ter 10 ou 11 dígitos.');
+  }
+  const emailInformado = cliente.email !== null && cliente.email !== undefined;
+  if (emailInformado && (!emailValido(cliente.email) || cliente.email.length > TAMANHO_MAXIMO_EMAIL)) {
+    throw new ErroValidacao('E-mail inválido.');
+  }
+}
+
+/**
+ * Valida os formatos das regras 1 a 4 do RF007 (cadastro).
  *
  * @param {{ nome: string, cpf: string, telefone: string, email: string, senha: string }} cliente Dados preparados.
  * @throws {ErroValidacao} Na primeira regra que não for atendida.
  */
 function validarFormatos(cliente) {
-  if (cliente.nome.length > TAMANHO_MAXIMO_NOME_CLIENTE) {
-    throw new ErroValidacao(`O nome deve ter no máximo ${TAMANHO_MAXIMO_NOME_CLIENTE} caracteres.`);
-  }
+  validarContato(cliente);
   if (!cpfValido(cliente.cpf)) {
     throw new ErroValidacao('CPF inválido.');
-  }
-  if (!DIGITOS_TELEFONE.includes(cliente.telefone.length)) {
-    throw new ErroValidacao('O telefone deve ter 10 ou 11 dígitos.');
-  }
-  if (!emailValido(cliente.email) || cliente.email.length > TAMANHO_MAXIMO_EMAIL) {
-    throw new ErroValidacao('E-mail inválido.');
   }
   if (cliente.senha.length < TAMANHO_MINIMO_SENHA) {
     throw new ErroValidacao(`A senha inicial deve ter no mínimo ${TAMANHO_MINIMO_SENHA} caracteres.`);
@@ -135,4 +151,63 @@ async function cadastrar(dados = {}) {
   );
 }
 
-module.exports = { listar, listarVeiculos, cadastrar };
+/**
+ * Busca um cliente com o e-mail de acesso, para a tela de alteração (RF009, passo 2).
+ *
+ * @param {number|string} id Id do cliente.
+ * @returns {Promise<object>} Cliente com nome, CPF, telefone e e-mail (null se não tiver acesso).
+ * @throws {ErroNaoEncontrado} Quando o cliente não existir.
+ */
+async function buscarPorId(id) {
+  const cliente = await clienteRepository.buscarPorId(id);
+  if (!cliente) {
+    throw new ErroNaoEncontrado('Cliente não encontrado.');
+  }
+  return cliente;
+}
+
+/**
+ * Impede usar o e-mail de acesso de outro usuário (RF009, regra 2 e fluxo alternativo 2).
+ * O próprio e-mail do cliente pode continuar o mesmo.
+ *
+ * @param {string} email E-mail novo, em minúsculas.
+ * @param {number|string} clienteId Id do cliente que está sendo alterado.
+ * @throws {ErroNegocio} Quando o e-mail já pertencer a outro usuário.
+ */
+async function validarEmailUnico(email, clienteId) {
+  const usuarioComEmail = await usuarioRepository.buscarPorEmail(email);
+  if (usuarioComEmail && usuarioComEmail.cliente_id !== Number(clienteId)) {
+    throw new ErroNegocio('Já existe um cliente com este e-mail.');
+  }
+}
+
+/**
+ * Altera o nome, o telefone e o e-mail de acesso de um cliente (RF009).
+ * O CPF não pode ser alterado (regra 1): mesmo que venha no corpo, é ignorado.
+ * O e-mail só é obrigatório e alterado se o cliente tiver acesso ao sistema.
+ *
+ * @param {number|string} id Id do cliente.
+ * @param {{ nome: string, telefone: string, email?: string }} [dados] Dados do formulário.
+ * @returns {Promise<void>}
+ * @throws {ErroValidacao} Quando faltar campo ou algum formato for inválido.
+ * @throws {ErroNaoEncontrado} Quando o cliente não existir.
+ * @throws {ErroNegocio} Quando o e-mail já pertencer a outro usuário.
+ */
+async function alterar(id, dados = {}) {
+  const clienteAtual = await buscarPorId(id);
+  const temAcesso = clienteAtual.email !== null;
+  validarObrigatorios(dados, temAcesso ? [...CAMPOS_OBRIGATORIOS_ALTERACAO, 'email'] : CAMPOS_OBRIGATORIOS_ALTERACAO);
+
+  const cliente = {
+    nome: dados.nome.trim(),
+    telefone: somenteDigitos(dados.telefone),
+    email: temAcesso ? dados.email.trim().toLowerCase() : null,
+  };
+  validarContato(cliente);
+  if (temAcesso) {
+    await validarEmailUnico(cliente.email, id);
+  }
+  await clienteRepository.atualizar(id, cliente);
+}
+
+module.exports = { listar, listarVeiculos, cadastrar, buscarPorId, alterar };

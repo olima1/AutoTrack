@@ -16,6 +16,10 @@ router.post('/', clienteController.cadastrar);
 
 router.get('/', clienteController.listar);
 
+router.get('/:id', clienteController.buscarPorId);
+
+router.put('/:id', clienteController.alterar);
+
 router.get('/:id/veiculos', clienteController.listarVeiculos);
 
 module.exports = router;
