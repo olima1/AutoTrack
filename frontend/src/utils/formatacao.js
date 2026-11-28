@@ -73,3 +73,13 @@ export const TRANSICOES_STATUS = Object.freeze({
   AGUARDANDO_PECAS: ['EM_ANDAMENTO'],
   CONCLUIDA: [],
 });
+
+/**
+ * Formata a quilometragem com separador de milhar: 45000 vira "45.000 km".
+ *
+ * @param {number|string} quilometragem Quilometragem do veículo.
+ * @returns {string} Quilometragem formatada.
+ */
+export function formatarQuilometragem(quilometragem) {
+  return `${Number(quilometragem).toLocaleString('pt-BR')} km`;
+}

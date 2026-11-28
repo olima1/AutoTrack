@@ -244,3 +244,14 @@ export async function cadastrarVeiculo(dados) {
   const resposta = await api.post('/veiculos', dados);
   return resposta.data;
 }
+
+/**
+ * Lista os veículos com o nome do cliente, com busca opcional por placa ou cliente (RF011).
+ *
+ * @param {string} [busca] Parte da placa ou do nome do cliente.
+ * @returns {Promise<{ id: number, placa: string, marca: string, modelo: string, ano: number, quilometragem: number, clienteNome: string }[]>} Veículos em ordem de placa.
+ */
+export async function listarVeiculos(busca) {
+  const resposta = await api.get('/veiculos', { params: { busca } });
+  return resposta.data;
+}
