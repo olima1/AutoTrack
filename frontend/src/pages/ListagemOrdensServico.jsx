@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { lerMensagemDeErro, listarOrdensServico } from '../services/api.js';
+import { excluirOrdemServico, lerMensagemDeErro, listarOrdensServico } from '../services/api.js';
 import { TEXTO_DO_STATUS, formatarData, formatarPreco, formatarStatus } from '../utils/formatacao.js';
+import Modal from '../components/Modal.jsx';
 
 /**
- * Tela I_ListagemOrdensServico (RF013).
+ * Tela I_ListagemOrdensServico (RF013, RF014 e RF015).
  * Mostra as ordens de serviço da mais recente para a mais antiga, com filtros de status,
- * placa e nome do cliente, e leva à abertura de uma nova ordem (RF012).
+ * placa e nome do cliente; leva à abertura (RF012) e à edição (RF014) e exclui ordens
+ * com status Aberta, com confirmação (RF015).
  *
  * @returns {JSX.Element}
  */
@@ -14,6 +16,26 @@ function ListagemOrdensServico() {
   const [ordens, setOrdens] = useState([]);
   const [filtros, setFiltros] = useState({ status: '', placa: '', cliente: '' });
   const [erro, setErro] = useState('');
+  const [ordemParaExcluir, setOrdemParaExcluir] = useState(null);
+  const [janela, setJanela] = useState(null);
+
+  /**
+   * Exclui a ordem confirmada na janela I_ConfirmacaoExclusaoOrdemServico (RF015)
+   * e mostra IS_OrdemServicoExcluida ou IE_OrdemServicoNaoExcluivel.
+   *
+   * @returns {Promise<void>}
+   */
+  async function confirmarExclusao() {
+    const ordem = ordemParaExcluir;
+    setOrdemParaExcluir(null);
+    try {
+      const resposta = await excluirOrdemServico(ordem.id);
+      setOrdens(ordens.filter((item) => item.id !== ordem.id));
+      setJanela({ tipo: 'sucesso', titulo: 'Ordem de serviço excluída', mensagem: resposta.mensagem });
+    } catch (erro) {
+      setJanela({ tipo: 'erro', titulo: 'Não foi possível excluir', mensagem: lerMensagemDeErro(erro) });
+    }
+  }
 
   /**
    * Busca as ordens na API com os filtros atuais.
@@ -117,11 +139,21 @@ function ListagemOrdensServico() {
                   </td>
                   <td>{formatarPreco(ordem.valorTotal)}</td>
                   <td>
-                    {ordem.status === 'CONCLUIDA' ? (
-                      <button type="button" className="botao botao-secundario botao-pequeno" disabled>Editar</button>
-                    ) : (
-                      <Link to={`/ordens-servico/${ordem.id}/editar`} className="botao botao-secundario botao-pequeno">Editar</Link>
-                    )}
+                    <div className="acoes">
+                      {/* Editar: só ordem não concluída (RF014, regra 3) */}
+                      {ordem.status === 'CONCLUIDA' ? (
+                        <button type="button" className="botao botao-secundario botao-pequeno" disabled>Editar</button>
+                      ) : (
+                        <Link to={`/ordens-servico/${ordem.id}/editar`} className="botao botao-secundario botao-pequeno">
+                          Editar
+                        </Link>
+                      )}
+                      {/* Excluir: só ordem com status Aberta (RF015, regra 1) */}
+                      <button type="button" className="botao botao-perigo botao-pequeno"
+                        disabled={ordem.status !== 'ABERTA'} onClick={() => setOrdemParaExcluir(ordem)}>
+                        Excluir
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -129,6 +161,24 @@ function ListagemOrdensServico() {
           </table>
         )}
       </div>
+      {ordemParaExcluir && (
+        <Modal
+          tipo="perigo"
+          titulo="Excluir ordem de serviço?"
+          mensagem={`A ordem de serviço #${ordemParaExcluir.id} de ${ordemParaExcluir.clienteNome} (placa ${ordemParaExcluir.placa}) será excluída. Esta ação não pode ser desfeita.`}
+        >
+          <button type="button" className="botao botao-secundario" onClick={() => setOrdemParaExcluir(null)}>
+            Cancelar
+          </button>
+          <button type="button" className="botao botao-perigo-cheio" onClick={confirmarExclusao}>
+            Confirmar exclusão
+          </button>
+        </Modal>
+      )}
+
+      {janela && (
+        <Modal tipo={janela.tipo} titulo={janela.titulo} mensagem={janela.mensagem} onFechar={() => setJanela(null)} />
+      )}
     </>
   );
 }
