@@ -109,12 +109,14 @@ export function lerMensagemDeErro(erro) {
 }
 
 /**
- * Lista os clientes para o formulário da ordem de serviço (RF012, passo 4).
+ * Lista os clientes em ordem alfabética, com busca opcional por nome ou CPF (RF008).
+ * Sem busca, devolve todos (usado também no formulário da ordem de serviço, RF012).
  *
- * @returns {Promise<{ id: number, nome: string, cpf: string }[]>} Clientes em ordem alfabética.
+ * @param {string} [busca] Parte do nome ou do CPF.
+ * @returns {Promise<{ id: number, nome: string, cpf: string, telefone: string, email: string|null }[]>} Clientes encontrados.
  */
-export async function listarClientes() {
-  const resposta = await api.get('/clientes');
+export async function listarClientes(busca) {
+  const resposta = await api.get('/clientes', { params: { busca } });
   return resposta.data;
 }
 
