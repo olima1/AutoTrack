@@ -152,3 +152,26 @@ export async function listarOrdensServico(filtros) {
   const resposta = await api.get('/ordens-servico', { params: filtros });
   return resposta.data;
 }
+
+/**
+ * Busca uma ordem de serviço com os seus serviços, para a tela de edição (RF014, passo 2).
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @returns {Promise<object>} Ordem com cliente, veículo, status, observações e servicos ({ servicoId, precoCobrado }).
+ */
+export async function buscarOrdemServico(id) {
+  const resposta = await api.get(`/ordens-servico/${id}`);
+  return resposta.data;
+}
+
+/**
+ * Altera o status, os serviços e as observações de uma ordem de serviço (RF014).
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @param {{ status: string, servicosIds: number[], observacoes?: string }} dados Campos que podem mudar.
+ * @returns {Promise<{ mensagem: string }>} Mensagem de sucesso.
+ */
+export async function alterarOrdemServico(id, dados) {
+  const resposta = await api.put(`/ordens-servico/${id}`, dados);
+  return resposta.data;
+}

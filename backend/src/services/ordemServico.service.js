@@ -6,8 +6,9 @@
 const ordemServicoRepository = require('../repositories/ordemServico.repository');
 const veiculoRepository = require('../repositories/veiculo.repository');
 const servicoRepository = require('../repositories/servico.repository');
-const { ErroValidacao, ErroNegocio } = require('../erros');
-const { TAMANHO_MAXIMO_OBSERVACOES_ORDEM, STATUS_ORDEM } = require('../constantes');
+const { ErroValidacao, ErroNegocio, ErroNaoEncontrado } = require('../erros');
+const { TAMANHO_MAXIMO_OBSERVACOES_ORDEM, STATUS_ORDEM, TRANSICOES_STATUS } = require('../constantes');
+
 
 /**
  * Verifica se o cliente e o veículo foram escolhidos (RF012, passo 12).
@@ -104,15 +105,15 @@ async function validarVeiculo(clienteId, veiculoId) { // ← corrigido
 }
 
 /**
- * Soma os preços dos serviços da ordem (RF012, regra 6).
+ * Soma os preços dos serviços da ordem (RF012 e RF014, regra 6).
  * Soma em centavos para evitar erro de arredondamento de números decimais.
  *
- * @param {{ preco: string|number }[]} servicos Serviços com o preço do catálogo.
+ * @param {{ precoCobrado: string|number }[]} itens Serviços da ordem com o preço cobrado.
  * @returns {number} Valor total em reais.
  */
-function calcularValorTotal(servicos) {
-  const totalEmCentavos = servicos.reduce(
-    (soma, servico) => soma + Math.round(Number(servico.preco) * 100),
+function calcularValorTotal(itens) {
+  const totalEmCentavos = itens.reduce(
+    (soma, item) => soma + Math.round(Number(item.precoCobrado) * 100),
     0
   );
   return totalEmCentavos / 100;
@@ -136,13 +137,13 @@ async function abrir(dados) {
     throw new ErroNegocio('Um dos serviços selecionados não existe mais no catálogo.');
   }
 
+  const itens = servicos.map((servico) => ({ servicoId: servico.id, precoCobrado: Number(servico.preco) }));
   const ordem = {
     clienteId: Number(dados.clienteId),
     veiculoId: Number(dados.veiculoId),
     observacoes: dados.observacoes?.trim() || null,
-    valorTotal: calcularValorTotal(servicos),
+    valorTotal: calcularValorTotal(itens),
   };
-  const itens = servicos.map((servico) => ({ servicoId: servico.id, precoCobrado: Number(servico.preco) }));
 
   return ordemServicoRepository.inserir(ordem, itens);
 }
@@ -159,4 +160,110 @@ async function listar(filtros = {}) {
   return ordemServicoRepository.buscarComFiltros({ status, placa, cliente });
 }
 
-module.exports = { abrir, validarDados, calcularValorTotal, listar };
+/**
+ * Impede alterar uma ordem de serviço já concluída (RF014, regra 3 e fluxo alternativo 1).
+ *
+ * @param {{ status: string }} ordem Ordem como está no banco.
+ * @throws {ErroNegocio} Quando a ordem estiver concluída.
+ */
+function podeSerAlterada(ordem) {
+  if (ordem.status === STATUS_ORDEM.CONCLUIDA) {
+    throw new ErroNegocio('Ordem de serviço concluída não pode ser alterada.');
+  }
+}
+
+/**
+ * Confere se a mudança de status é permitida (RF014, regras 1 e 2 e fluxo alternativo 3).
+ * Manter o mesmo status é sempre permitido (só serviços ou observações mudaram).
+ *
+ * @param {string} atual Status atual da ordem.
+ * @param {string} novo Status escolhido no formulário.
+ * @throws {ErroValidacao} Quando o status novo não existir.
+ * @throws {ErroNegocio} Quando a mudança não estiver em TRANSICOES_STATUS.
+ */
+function validarTransicaoStatus(atual, novo) {
+  if (!Object.values(STATUS_ORDEM).includes(novo)) {
+    throw new ErroValidacao('Status inválido.');
+  }
+  if (novo !== atual && !TRANSICOES_STATUS[atual].includes(novo)) {
+    throw new ErroNegocio('Mudança de status não permitida.');
+  }
+}
+
+/**
+ * Monta os serviços da ordem depois da alteração (RF014, regra 5).
+ * Os serviços que já estavam na ordem mantêm o preço da abertura;
+ * os adicionados agora usam o preço vigente do catálogo.
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @param {number[]} servicosIds Ids de todos os serviços marcados no formulário.
+ * @returns {Promise<{ itens: object[], itensNovos: object[], idsMarcados: number[] }>} Itens finais, só os novos e os ids marcados.
+ * @throws {ErroNegocio} Quando um serviço novo não existir mais no catálogo.
+ */
+async function montarItens(id, servicosIds) {
+  // Vai para o DELETE no repository
+  const idsMarcados = [...new Set(servicosIds.map(Number))];
+  const servicosAtuais = await ordemServicoRepository.buscarServicosDaOrdem(id);
+  const idsAtuais = servicosAtuais.map((item) => item.servicoId);
+
+  // Vem de serviço da ordem com o preço antigo.
+  const itensMantidos = servicosAtuais.filter((item) => idsMarcados.includes(item.servicoId));
+  const idsNovos = idsMarcados.filter((servicoId) => !idsAtuais.includes(servicoId));
+
+  const servicosNovos = idsNovos.length > 0 ? await servicoRepository.buscarPorIds(idsNovos) : [];
+  if (servicosNovos.length !== idsNovos.length) {
+    throw new ErroNegocio('Um dos serviços selecionados não existe mais no catálogo.');
+  }
+
+  // Vem do catálogo com o preço atual.
+  const itensNovos = servicosNovos.map((servico) => ({ servicoId: servico.id, precoCobrado: Number(servico.preco) }));
+
+  return { itens: [...itensMantidos, ...itensNovos], itensNovos, idsMarcados };
+}
+
+/**
+ * Altera o status, as observações e os serviços de uma ordem de serviço (RF014).
+ * Cliente e veículo não mudam depois da abertura (regra 4).
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @param {{ status: string, servicosIds: number[], observacoes?: string }} [dados] Dados do formulário.
+ * @returns {Promise<void>}
+ * @throws {ErroValidacao} Quando faltar serviço, as observações forem longas ou o status não existir.
+ * @throws {ErroNaoEncontrado} Quando a ordem não existir.
+ * @throws {ErroNegocio} Quando a ordem estiver concluída, a mudança de status não for permitida ou um serviço não existir.
+ */
+async function alterar(id, dados) {
+  validarLista(dados);
+  validarTamanho(dados);
+  const ordem = await ordemServicoRepository.buscarPorId(id);
+  if (!ordem) {
+    throw new ErroNaoEncontrado('Ordem de serviço não encontrada.')
+  }
+  podeSerAlterada(ordem);
+  validarTransicaoStatus(ordem.status, dados.status);
+  const { itens, itensNovos, idsMarcados } = await montarItens(id, dados.servicosIds);
+  const ordemAtualizada = {
+    status: dados.status,
+    observacoes: dados.observacoes?.trim() || null,
+    valorTotal: calcularValorTotal(itens),
+  };
+  await ordemServicoRepository.atualizar(id, ordemAtualizada, { itensNovos, servicosIds: idsMarcados });
+}
+
+/**
+ * Busca uma ordem de serviço com os seus serviços, para a tela de edição (RF014, passo 2).
+ *
+ * @param {number|string} id Id da ordem de serviço.
+ * @returns {Promise<object>} A ordem com cliente, veículo e a lista de serviços com o preço cobrado.
+ * @throws {ErroNaoEncontrado} Quando a ordem não existir.
+ */
+async function buscarPorId(id) {
+  const ordem = await ordemServicoRepository.buscarPorId(id);
+  if (!ordem) {
+    throw new ErroNaoEncontrado('Ordem de serviço não encontrada.');
+  }
+  const servicos = await ordemServicoRepository.buscarServicosDaOrdem(id);
+  return { ...ordem, servicos };
+}
+
+module.exports = { abrir, validarDados, calcularValorTotal, listar, alterar, buscarPorId };
