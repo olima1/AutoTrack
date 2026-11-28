@@ -199,3 +199,26 @@ export async function cadastrarCliente(dados) {
   const resposta = await api.post('/clientes', dados);
   return resposta.data;
 }
+
+/**
+ * Busca um cliente com o e-mail de acesso, para a tela de alteração (RF009, passo 2).
+ *
+ * @param {number|string} id Id do cliente.
+ * @returns {Promise<{ id: number, nome: string, cpf: string, telefone: string, email: string|null }>} O cliente.
+ */
+export async function buscarCliente(id) {
+  const resposta = await api.get(`/clientes/${id}`);
+  return resposta.data;
+}
+
+/**
+ * Altera o nome, o telefone e o e-mail de acesso de um cliente (RF009).
+ *
+ * @param {number|string} id Id do cliente.
+ * @param {{ nome: string, telefone: string, email?: string }} dados Campos que podem mudar (o CPF não muda).
+ * @returns {Promise<{ mensagem: string }>} Mensagem de sucesso.
+ */
+export async function alterarCliente(id, dados) {
+  const resposta = await api.put(`/clientes/${id}`, dados);
+  return resposta.data;
+}

@@ -4,9 +4,10 @@ import { lerMensagemDeErro, listarClientes } from '../services/api.js';
 import { formatarCpf, formatarTelefone } from '../utils/formatacao.js';
 
 /**
- * Tela I_ListagemClientes (RF007 e RF008).
+ * Tela I_ListagemClientes (RF007, RF008 e RF009).
  * Lista os clientes em ordem alfabética com nome, CPF, telefone e e-mail (RF008, regra 2),
- * filtra por parte do nome ou do CPF ao clicar em "Pesquisar" e leva ao cadastro (RF007).
+ * filtra por parte do nome ou do CPF ao clicar em "Pesquisar" e leva ao cadastro (RF007)
+ * e à alteração (RF009).
  *
  * @returns {JSX.Element}
  */
@@ -73,6 +74,7 @@ function ListagemClientes() {
                 <th>CPF</th>
                 <th>Telefone</th>
                 <th>E-mail</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -82,6 +84,13 @@ function ListagemClientes() {
                   <td>{formatarCpf(cliente.cpf)}</td>
                   <td>{formatarTelefone(cliente.telefone)}</td>
                   <td>{cliente.email ?? '—'}</td>
+                  <td>
+                    <div className="acoes">
+                      <Link to={`/clientes/${cliente.id}/editar`} className="botao botao-secundario botao-pequeno">
+                        Editar
+                      </Link>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -29,6 +29,7 @@ function App() {
           <Route path="/ordens-servico/:id/editar" element={<FormularioOrdemServico />} />
           <Route path="/clientes" element={<ListagemClientes />} />
           <Route path="/clientes/novo" element={<FormularioCliente />} />
+          <Route path="/clientes/:id/editar" element={<FormularioCliente />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
