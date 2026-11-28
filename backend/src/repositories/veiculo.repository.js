@@ -28,7 +28,7 @@ async function buscarPorId(id) {
  */
 async function listarPorCliente(clienteId) {
   const [linhas] = await pool.query(
-    'SELECT id, placa, marca, modelo FROM Veiculo WHERE cliente_id = ? ORDER BY placa',
+    'SELECT id, placa, marca, modelo, ano, quilometragem FROM Veiculo WHERE cliente_id = ? ORDER BY placa',
     [clienteId]
   );
   return linhas;
