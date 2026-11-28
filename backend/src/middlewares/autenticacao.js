@@ -41,4 +41,20 @@ function permitirPerfis(...perfis) {
   };
 }
 
-module.exports = { verificarToken, permitirPerfis };
+/**
+ * Bloqueia o Cliente que ainda não trocou a senha inicial (RF017, regra 1).
+ * Usar depois do verificarToken nas rotas que o Cliente usa no dia a dia.
+ *
+ * @param {import('express').Request} req Requisição com req.usuario preenchido.
+ * @param {import('express').Response} _res Resposta HTTP (não usada).
+ * @param {import('express').NextFunction} next Segue para a rota ou repassa o erro 403.
+ * @returns {void}
+ */
+function exigirSenhaAlterada(req, _res, next) {
+  if (req.usuario.primeiroAcesso) {
+    return next(new ErroAcessoNegado('Altere a senha inicial para continuar.'));
+  }
+  return next();
+}
+
+module.exports = { verificarToken, permitirPerfis, exigirSenhaAlterada };
